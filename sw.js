@@ -1,6 +1,6 @@
 /* 60초 리셋 — service worker (오프라인 캐시)
    bump CACHE 버전을 올리면 새 버전이 배포됨 */
-const CACHE = "reset60-v3";
+const CACHE = "reset60-v4";
 const CORE = [
   "./",
   "./index.html",
@@ -8,6 +8,9 @@ const CORE = [
   "./icon-192.png",
   "./icon-512.png",
   "./apple-touch-icon.png",
+  "./fonts/playfair-500.woff2",
+  "./fonts/playfair-600.woff2",
+  "./fonts/playfair-700.woff2",
 ];
 
 self.addEventListener("install", (e) => {
