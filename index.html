@@ -6,7 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="theme-color" content="#eaf0ec" />
+<meta name="apple-mobile-web-app-title" content="60초 리셋" />
 <title>60초 리셋</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <style>
@@ -350,29 +354,7 @@ body{
       <input class="time-in" type="time" id="nudgeTime" value="10:00" />
     </div>
 
-    <div class="row">
-      <div><div class="label">말씀 본문 채우기</div>
-      <div class="desc">기본은 개역개정. 네가 읽는 번역본(우리말·새번역)으로 바꿔 붙여넣을 수 있어.</div></div>
-      <div class="seg"><button id="openVerseEdit" style="background:var(--accent);color:#fff;border-color:transparent;">편집</button></div>
-    </div>
-
     <div class="hint" id="nudgeHint"></div>
-  </div>
-</div>
-
-<!-- VERSE EDIT modal -->
-<div class="modal" id="verseModal">
-  <div class="sheet">
-    <button class="close-x" data-close-verse>닫기</button>
-    <h2>말씀 본문</h2>
-    <div class="verse-pick" id="veRef"></div>
-    <p class="hint" style="margin:6px 0 12px;">본문을 비우면 기본 개역개정으로 보여. 네가 읽는 번역본으로 바꾸고 싶으면 여기 붙여넣어.</p>
-    <textarea id="veText" placeholder="이 구절 본문을 붙여넣기…"></textarea>
-    <div style="display:flex;gap:10px;margin-top:14px;">
-      <button class="btn btn-ghost" id="vePrev" style="flex:1;">← 이전</button>
-      <button class="btn btn-ghost" id="veNext" style="flex:1;">다음 →</button>
-    </div>
-    <button class="btn btn-primary" id="veSave" style="margin-top:10px;">저장</button>
   </div>
 </div>
 
@@ -385,13 +367,12 @@ body{
 const K = {
   settings:"reset60:settings",
   log:"reset60:log",
-  verses:"reset60:verses",
   lastOpen:"reset60:lastOpen",
 };
 const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 
-const DEFAULT_SETTINGS = { nudgeEnabled:false, nudgeCount:2, nudgeTime:"10:00", mascot:"none", verseSource:"manual" };
+const DEFAULT_SETTINGS = { nudgeEnabled:false, nudgeCount:2, nudgeTime:"10:00" };
 let settings = Object.assign({}, DEFAULT_SETTINGS, load(K.settings, {}));
 
 /* ---------- 구절 풀 (개역개정 기본 본문 내장) ---------- */
@@ -412,9 +393,6 @@ const VERSE_SEED = [
   {ref:"시편 121:1-2", theme:"도움", text:"내가 산을 향하여 눈을 들리라 나의 도움이 어디서 올까 나의 도움은 천지를 지으신 여호와에게서로다"},
   {ref:"마태복음 6:26", theme:"돌보심", text:"공중의 새를 보라 심지도 않고 거두지도 않고 창고에 모아들이지도 아니하되 너희 하늘 아버지께서 기르시나니 너희는 이것들보다 귀하지 아니하냐"},
 ];
-/* 사용자 편집 본문(있으면 우선) */
-let verseOverrides = load(K.verses, {}); // { ref: "사용자 본문" }
-function verseTextFor(v){ return (verseOverrides[v.ref] && verseOverrides[v.ref].trim()) ? verseOverrides[v.ref] : v.text; }
 function prayerFor(theme){ return "주님, 이 잠깐 동안 " + (theme||"쉼") + "을(를) 주세요."; }
 
 /* ---------- 한 가지 풀 (~32, 랜덤 노출) ---------- */
@@ -487,7 +465,7 @@ let curVerse=null;
 function loadVerse(){
   curVerse = VERSE_SEED[Math.floor(Math.random()*VERSE_SEED.length)];
   document.getElementById("verseRef").textContent=curVerse.ref;
-  document.getElementById("verseText").textContent=verseTextFor(curVerse);
+  document.getElementById("verseText").textContent=curVerse.text;
   document.getElementById("versePray").textContent=prayerFor(curVerse.theme);
 }
 document.getElementById("verseAnother").addEventListener("click",loadVerse);
@@ -678,35 +656,17 @@ function scheduleNudges(){
 }
 
 /* ============================================================
-   말씀 본문 편집 모달
-   ============================================================ */
-const vModal=document.getElementById("verseModal");
-let veIdx=0;
-document.getElementById("openVerseEdit").addEventListener("click",()=>{ veIdx=0; renderVE(); vModal.classList.add("open"); });
-vModal.addEventListener("click",e=>{ if(e.target===vModal||e.target.hasAttribute("data-close-verse")) vModal.classList.remove("open"); });
-function renderVE(){
-  const v=VERSE_SEED[veIdx];
-  document.getElementById("veRef").textContent=(veIdx+1)+" / "+VERSE_SEED.length+"   ·   "+v.ref;
-  const ov=verseOverrides[v.ref];
-  document.getElementById("veText").value=ov!==undefined?ov:"";
-  document.getElementById("veText").placeholder=v.text;
-}
-function veCommit(){
-  const v=VERSE_SEED[veIdx]; const val=document.getElementById("veText").value;
-  if(val.trim()) verseOverrides[v.ref]=val.trim(); else delete verseOverrides[v.ref];
-  save(K.verses,verseOverrides);
-}
-document.getElementById("vePrev").addEventListener("click",()=>{ veCommit(); veIdx=(veIdx-1+VERSE_SEED.length)%VERSE_SEED.length; renderVE(); });
-document.getElementById("veNext").addEventListener("click",()=>{ veCommit(); veIdx=(veIdx+1)%VERSE_SEED.length; renderVE(); });
-document.getElementById("veSave").addEventListener("click",()=>{ veCommit(); vModal.classList.remove("open"); });
-
-/* ============================================================
    부팅
    ============================================================ */
 refreshGreeting();
 show("home");
 save(K.lastOpen,new Date().toISOString());
 scheduleNudges();
+
+/* PWA: 설치 + 오프라인 (http(s)로 서빙될 때만 등록) */
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
 </script>
 </body>
 </html>
