@@ -220,6 +220,14 @@ body{
 .chip:active{transform:scale(.97);}
 .chip .cw{font-family:var(--serif);font-size:21px;font-weight:600;}
 .chip .cg{display:block;font-size:12.5px;font-weight:450;color:var(--ink-soft);margin-top:5px;letter-spacing:.02em;}
+/* Pass2 — 한 가지 화면 은은한 추천 칩 */
+.chip.rec{box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.95),0 0 0 1.5px rgba(154,143,212,.5);}
+.chip .rectag{display:block;font-size:11px;font-weight:600;color:var(--accent-deep);letter-spacing:.04em;margin-bottom:4px;opacity:.92;}
+/* Pass2 — done '한 걸음 더' */
+.done-more{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:2px;}
+.done-more .mini{font-size:13px;color:var(--ink-faint);padding:7px 14px;}
+/* Pass2 — 접기 */
+.collapsed{display:none!important;}
 .input{width:100%;padding:18px;border-radius:18px;border:1px solid var(--glass-line);
   background:var(--g-strong) center/cover no-repeat;font-family:inherit;font-size:16px;color:var(--ink);
   text-align:center;outline:none;transition:border-color .3s,box-shadow .3s;}
@@ -437,7 +445,8 @@ body{
       <div class="title" id="oneTitle">지금 가볍게 시동 걸 거,<br><span class="em">딱 하나만.</span></div>
       <div class="chips" id="oneChips"></div>
       <button class="softlink" id="oneReshuffle"><svg class="ic"><use href="#i-refresh"/></svg>마음 안 끌리면, 다른 거</button>
-      <input class="input" id="oneInput" placeholder="직접 적어도 돼 (선택)" />
+      <button class="softlink" id="oneWriteToggle">직접 적기</button>
+      <input class="input collapsed" id="oneInput" placeholder="예: 책상 위 1개만" />
       <button class="btn-ghost" data-go="done">오늘은 여기까지 — 그것도 좋아</button>
     </div>
   </section>
@@ -484,6 +493,10 @@ body{
     <div class="wrap">
       <div class="title" id="doneText"><span class="em">해냈다. 진짜로.</span></div>
       <div class="lead" id="doneSub" style="color: rgb(245, 245, 245)">닫아도 성공이야.</div>
+      <div class="done-more collapsed" id="doneMore">
+        <button class="softlink" id="moreNew"><svg class="ic"><use href="#i-sprout"/></svg>한 가지만 더 해볼까?</button>
+        <button class="softlink mini" id="moreSame">방금 거 한 번 더</button>
+      </div>
       <button class="softlink" data-go="home">처음으로</button>
     </div>
   </section>
@@ -520,6 +533,10 @@ body{
       <div><div class="label">첫 시간</div><div class="desc">이때부터 고르게 나눠서.</div></div>
       <input class="time-in" type="time" id="nudgeTime" value="10:00" />
     </div>
+    <div class="row">
+      <div><div class="label">눈 감고 쓸 때 신호</div><div class="desc">호흡·기도 흐름을 부드러운 진동·소리로. 알람 아냐.</div></div>
+      <button class="toggle" id="tgCues"></button>
+    </div>
     <div class="hint" id="nudgeHint"></div>
   </div>
 </div>
@@ -535,8 +552,34 @@ const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 
-const DEFAULT_SETTINGS = { nudgeEnabled:false, nudgeCount:2, nudgeTime:"10:00" };
+const DEFAULT_SETTINGS = { nudgeEnabled:false, nudgeCount:2, nudgeTime:"10:00", cuesEnabled:false };
 let settings = Object.assign({}, DEFAULT_SETTINGS, load(K.settings, {}));
+
+/* ---------- 눈 감고 쓰는 모드: 부드러운 진동 + 싱잉볼 한 음 (기본 OFF) ---------- */
+let audioCtx=null;
+function chime(freq){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    if(!audioCtx) audioCtx=new AC();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    const t=audioCtx.currentTime;
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type="sine"; o.frequency.value=freq||528;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.10,t+0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+1.8);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t+1.9);
+  }catch(_){}
+}
+function cue(opts){
+  if(!settings.cuesEnabled) return;
+  opts=opts||{};
+  if(navigator.vibrate){ try{ navigator.vibrate(opts.long?[18,40,18]:14); }catch(_){} }
+  chime(opts.freq);
+}
+/* ---------- 셔플/구절 교체 부드러운 페이드 ---------- */
+function fadeSwap(el, fn){ if(!el){ fn(); return; } el.style.transition="opacity .2s var(--ease)"; el.style.opacity="0"; setTimeout(()=>{ fn(); el.style.opacity="1"; },170); }
 
 /* ============================================================
    ✦ Sparkle field — 흰 반짝임 (canvas)
@@ -675,9 +718,13 @@ const ONE_POOL = [
    ============================================================ */
 const screens = {};
 document.querySelectorAll(".screen").forEach(s=>screens[s.dataset.screen]=s);
-let current = "home", lolFlag=false, oneThing=null;
+let current = "home", lolFlag=false, oneThing=null, enoughTimer=null;
+if(screens["enough"]) screens["enough"].addEventListener("click",()=>{
+  if(current==="enough"){ if(enoughTimer){ clearTimeout(enoughTimer); enoughTimer=null; } show(lolFlag?"lol":"one"); }
+});
 
 function show(name){
+  if(enoughTimer){ clearTimeout(enoughTimer); enoughTimer=null; }
   if(screens[current]) screens[current].classList.remove("active");
   current = name;
   screens[name].classList.add("active");
@@ -690,7 +737,7 @@ function show(name){
   if(name==="timer") startTimer();
   if(name==="log") renderLog();
   if(["breath","timer","center","prayer"].includes(name)) startField(name); else stopField();
-  if(name==="enough"){ setTimeout(()=>{ show(lolFlag ? "lol" : "one"); }, 1500); }
+  if(name==="enough"){ enoughTimer=setTimeout(()=>{ enoughTimer=null; show(lolFlag ? "lol" : "one"); }, 1600); }
   if(name==="home") refreshGreeting();
   // 처음으로 단축키: 홈 화면엔 숨기고 나머지 화면에서만 노출
   const homeBtn=document.getElementById("navHome");
@@ -714,9 +761,9 @@ function startBreath(){
   const w=document.getElementById("breathWord"); stopBreath();
   [document.querySelector(".orb-img"),document.querySelector(".orb-halo")].forEach(el=>{ if(el){ el.style.animation="none"; void el.offsetWidth; el.style.animation=""; } });
   let inhale=true; w.textContent="들이쉬고…";
-  const cycle=()=>{ inhale=!inhale; w.style.opacity=0;
+  const cycle=()=>{ inhale=!inhale; w.style.opacity=0; cue({freq: inhale?528:392});
     setTimeout(()=>{ w.textContent=inhale?"들이쉬고…":"내쉬고…"; w.style.opacity=1; },450); };
-  w.style.transition="opacity .4s ease"; w.style.opacity=1; breathTimer=setInterval(cycle,4000);
+  w.style.transition="opacity .4s ease"; w.style.opacity=1; cue({freq:528}); breathTimer=setInterval(cycle,4000);
 }
 function stopBreath(){ if(breathTimer){clearInterval(breathTimer);breathTimer=null;} }
 
@@ -733,10 +780,10 @@ function startPrayer(){
   stopPrayer();
   const el=document.getElementById("prayerLine"), hint=document.getElementById("prayerHint");
   hint.textContent="눈 감고 외워도, 천천히 읽어도 좋아."; let i=0;
-  const render=()=>{ el.style.opacity=0; setTimeout(()=>{ el.innerHTML=PRAYER_LINES[i].replace(/\n/g,"<br>"); el.style.opacity=1; },450); };
+  const render=()=>{ el.style.opacity=0; cue(); setTimeout(()=>{ el.innerHTML=PRAYER_LINES[i].replace(/\n/g,"<br>"); el.style.opacity=1; },450); };
   render();
   prayerTimer=setInterval(()=>{ i++;
-    if(i>=PRAYER_LINES.length){ clearInterval(prayerTimer); prayerTimer=null; hint.textContent="이거면 충분해 — 천천히."; return; }
+    if(i>=PRAYER_LINES.length){ clearInterval(prayerTimer); prayerTimer=null; hint.textContent="이거면 충분해 — 천천히."; cue({long:true}); return; }
     render();
   },5200);
 }
@@ -766,8 +813,9 @@ function startCenter(){
   if(!centerChoice) centerChoice=CENTER_WORDS[Math.floor(Math.random()*CENTER_WORDS.length)];
   document.getElementById("centerWord").textContent=centerChoice.w;
   document.getElementById("centerGloss").textContent=centerChoice.g;
+  cue();
 }
-document.getElementById("centerReshuffle").addEventListener("click",renderCenterChips);
+document.getElementById("centerReshuffle").addEventListener("click",()=>fadeSwap(document.getElementById("centerChips"),renderCenterChips));
 
 /* ============================================================ 말씀 */
 let curVerse=null;
@@ -777,20 +825,29 @@ function loadVerse(){
   document.getElementById("verseText").textContent=curVerse.text;
   document.getElementById("versePray").textContent=prayerLine(curVerse);
 }
-document.getElementById("verseAnother").addEventListener("click",loadVerse);
+document.getElementById("verseAnother").addEventListener("click",()=>fadeSwap(document.querySelector(".verse-card"),loadVerse));
 
 /* ============================================================ 한 가지 */
 function pick3(){ const a=ONE_POOL.slice(), out=[]; for(let i=0;i<3&&a.length;i++) out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); return out; }
 function renderChips(){
   const box=document.getElementById("oneChips"); box.innerHTML="";
-  pick3().forEach(t=>{
-    const b=document.createElement("button"); b.className="chip"; b.textContent=t;
+  pick3().forEach((t,i)=>{
+    const b=document.createElement("button"); b.className="chip"+(i===0?" rec":"");
+    b.innerHTML=(i===0?"<span class='rectag'>이거 어때?</span>":"")+"<span>"+t+"</span>";
     b.addEventListener("pointerdown",ripple);
     b.addEventListener("click",()=>{ oneThing=t; show("timer"); });
     box.appendChild(b);
   });
+  const inp=document.getElementById("oneInput"), tog=document.getElementById("oneWriteToggle");
+  if(inp){ inp.value=""; inp.classList.add("collapsed"); }
+  if(tog){ tog.style.display=""; }
 }
-document.getElementById("oneReshuffle").addEventListener("click",renderChips);
+document.getElementById("oneReshuffle").addEventListener("click",()=>fadeSwap(document.getElementById("oneChips"),renderChips));
+document.getElementById("oneWriteToggle").addEventListener("click",()=>{
+  const inp=document.getElementById("oneInput"), tog=document.getElementById("oneWriteToggle");
+  inp.classList.toggle("collapsed");
+  if(!inp.classList.contains("collapsed")){ tog.style.display="none"; try{ inp.focus(); }catch(_){} }
+});
 document.getElementById("oneInput").addEventListener("keydown",e=>{
   if(e.key==="Enter" && e.target.value.trim()){ oneThing=e.target.value.trim(); show("timer"); }
 });
@@ -817,6 +874,7 @@ function finishTimer(complete){
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
   if(complete){ d.innerHTML="<span class='em'>해냈다. 진짜로.</span>"; s.textContent="닫아도 성공이야."; }
   else { d.innerHTML="<span class='em'>이거면 충분해.</span>"; s.textContent="시작한 것만으로 충분해."; }
+  document.getElementById("doneMore").classList.remove("collapsed");
   show("done");
 }
 document.getElementById("timerStop").addEventListener("click",()=>{
@@ -870,13 +928,17 @@ function lolEnter(){ lolFlag=true; show("breath"); }
 document.querySelectorAll("[data-enough]").forEach(b=>b.addEventListener("click",()=>{ logAdd(b.dataset.enough); show("enough"); }));
 function finishDone(){
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
-  d.innerHTML="<span class='em'>그것도 좋아.</span>"; s.textContent="닫아도 성공이야."; show("done");
+  d.innerHTML="<span class='em'>그것도 좋아.</span>"; s.textContent="닫아도 성공이야.";
+  document.getElementById("doneMore").classList.add("collapsed"); show("done");
 }
 document.getElementById("lolFirst").addEventListener("click",()=>{ show("one"); });
 document.getElementById("lolGo").addEventListener("click",()=>{
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
-  d.innerHTML="<span class='em'>재밌게 해.</span>"; s.textContent="죄책감 금지."; show("done");
+  d.innerHTML="<span class='em'>재밌게 해.</span>"; s.textContent="죄책감 금지.";
+  document.getElementById("doneMore").classList.add("collapsed"); show("done");
 });
+document.getElementById("moreNew").addEventListener("click",()=>show("one"));
+document.getElementById("moreSame").addEventListener("click",()=>{ if(oneThing) show("timer"); else show("one"); });
 document.getElementById("navLog").addEventListener("click",()=>show("log"));
 document.getElementById("navSettings").addEventListener("click",openSettings);
 document.getElementById("navHome").addEventListener("click",()=>{
@@ -893,6 +955,7 @@ sModal.addEventListener("click",e=>{ if(e.target===sModal||e.target.hasAttribute
 const tgNudge=document.getElementById("tgNudge"), freqSeg=document.getElementById("nudgeFreq"), nudgeTime=document.getElementById("nudgeTime");
 function syncSettingsUI(){
   tgNudge.classList.toggle("on",!!settings.nudgeEnabled);
+  document.getElementById("tgCues").classList.toggle("on",!!settings.cuesEnabled);
   [...freqSeg.children].forEach(b=>b.classList.toggle("sel",+b.dataset.n===settings.nudgeCount));
   nudgeTime.value=settings.nudgeTime||"10:00";
   document.getElementById("nudgeFreqRow").style.opacity=settings.nudgeEnabled?1:.45;
@@ -908,6 +971,10 @@ tgNudge.addEventListener("click",()=>{
 });
 freqSeg.addEventListener("click",e=>{ if(e.target.dataset.n){ settings.nudgeCount=+e.target.dataset.n; save(K.settings,settings); syncSettingsUI(); scheduleNudges(); }});
 nudgeTime.addEventListener("change",()=>{ settings.nudgeTime=nudgeTime.value; save(K.settings,settings); scheduleNudges(); });
+document.getElementById("tgCues").addEventListener("click",()=>{
+  settings.cuesEnabled=!settings.cuesEnabled; save(K.settings,settings); syncSettingsUI();
+  if(settings.cuesEnabled) cue();
+});
 
 let nudgeTimers=[];
 const NUDGE_MSGS=["60초만 멈춰 볼까?","숨 한 번 쉬고 가자.","말씀 한 구절 어때?","이거면 충분해 — 잠깐 들러."];
