@@ -101,6 +101,22 @@ body{
   font-weight:500;cursor:pointer;padding:12px 16px;border-radius:16px;transition:color .3s;}
 .softlink:active{color:var(--accent-deep);}
 
+/* home mode pills (말씀 / 호흡 / 기도) */
+.modes{display:flex;flex-direction:column;gap:13px;width:100%;}
+.mode{display:flex;align-items:center;gap:16px;width:100%;padding:20px 22px;text-align:left;}
+.mode .emoji{font-size:26px;line-height:1;flex:none;}
+.mode .t{font-size:18px;font-weight:650;display:block;}
+.mode .sub{font-size:13px;font-weight:450;color:var(--ink-soft);display:block;margin-top:2px;}
+
+/* prayer mode */
+.prayer-stage{position:relative;width:100%;min-height:210px;display:flex;align-items:center;justify-content:center;}
+.prayer-glow{position:absolute;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(174,202,219,.42),rgba(169,198,180,.18) 45%,transparent 72%);
+  filter:blur(14px);animation:glowpulse 9s ease-in-out infinite;}
+@keyframes glowpulse{0%,100%{opacity:.5;transform:scale(.95);}50%{opacity:.85;transform:scale(1.06);}}
+.prayer-line{position:relative;z-index:2;font-size:22px;font-weight:600;line-height:1.6;
+  max-width:300px;letter-spacing:-.01em;transition:opacity .8s ease;}
+
 /* corner controls */
 .corner{position:fixed;top:max(16px,env(safe-area-inset-top));right:18px;display:flex;gap:6px;z-index:20;}
 .icon-btn{width:42px;height:42px;border-radius:14px;border:1px solid var(--glass-line);
@@ -224,9 +240,10 @@ body{
     <div class="wrap">
       <div class="fade-line" id="homeGreeting"></div>
       <div class="kicker">잠깐, 60초만.</div>
-      <div class="btn-row">
-        <button class="btn btn-xl" data-go="word"><span class="emoji">🙏</span>말씀<span class="sub">한 구절 읽기</span></button>
-        <button class="btn btn-xl" data-go="breath"><span class="emoji">🌬️</span>호흡<span class="sub">같이 숨 쉬기</span></button>
+      <div class="modes">
+        <button class="btn mode" data-go="word"><span class="emoji">🙏</span><span><span class="t">말씀</span><span class="sub">한 구절 읽기</span></span></button>
+        <button class="btn mode" data-go="prayer"><span class="emoji">🕯️</span><span><span class="t">기도</span><span class="sub">눈 감고 천천히 주기도문</span></span></button>
+        <button class="btn mode" data-go="breath"><span class="emoji">🌬️</span><span><span class="t">호흡</span><span class="sub">같이 숨 쉬기</span></span></button>
       </div>
       <button class="softlink" data-go="lol">🎮 롤 켜기 전이야?</button>
     </div>
@@ -254,6 +271,18 @@ body{
       </div>
       <button class="btn btn-soft" data-enough="word">이거면 충분해</button>
       <button class="softlink" id="verseAnother">다른 구절 보기</button>
+    </div>
+  </section>
+
+  <!-- PRAYER -->
+  <section class="screen" data-screen="prayer">
+    <div class="wrap">
+      <div class="prayer-stage">
+        <div class="prayer-glow"></div>
+        <div class="prayer-line" id="prayerLine"></div>
+      </div>
+      <div class="fade-line" id="prayerHint">눈 감고 외워도, 천천히 읽어도 좋아.</div>
+      <button class="btn btn-soft" data-enough="prayer">이거면 충분해</button>
     </div>
   </section>
 
@@ -421,6 +450,7 @@ function show(name){
   current = name;
   screens[name].classList.add("active");
   if(name==="breath") startBreath(); else stopBreath();
+  if(name==="prayer") startPrayer(); else stopPrayer();
   if(name==="word") loadVerse();
   if(name==="one") renderChips();
   if(name==="timer") startTimer();
@@ -457,6 +487,45 @@ function startBreath(){
   breathTimer=setInterval(cycle,5000);
 }
 function stopBreath(){ if(breathTimer){clearInterval(breathTimer);breathTimer=null;} }
+
+/* ============================================================
+   기도 (주기도문 페이싱) — 눈 감고 외워도, 읽어도 성공
+   ============================================================ */
+const PRAYER_LINES = [
+  "하늘에 계신 우리 아버지여",
+  "이름이 거룩히 여김을 받으시오며",
+  "나라가 임하시오며",
+  "뜻이 하늘에서 이루어진 것 같이",
+  "땅에서도 이루어지이다",
+  "오늘날 우리에게\n일용할 양식을 주시옵고",
+  "우리가 우리에게 죄 지은 자를\n사하여 준 것 같이",
+  "우리 죄를 사하여 주시옵고",
+  "우리를 시험에 들게 하지 마시옵고",
+  "다만 악에서 구하시옵소서",
+  "나라와 권세와 영광이\n아버지께 영원히 있사옵나이다",
+  "아멘.",
+];
+let prayerTimer=null;
+function startPrayer(){
+  stopPrayer();
+  const el=document.getElementById("prayerLine");
+  const hint=document.getElementById("prayerHint");
+  hint.textContent="눈 감고 외워도, 천천히 읽어도 좋아.";
+  let i=0;
+  const render=()=>{ el.style.opacity=0;
+    setTimeout(()=>{ el.innerHTML=PRAYER_LINES[i].replace(/\n/g,"<br>"); el.style.opacity=1; },450); };
+  render();
+  prayerTimer=setInterval(()=>{
+    i++;
+    if(i>=PRAYER_LINES.length){ // 끝까지 가면 아멘에 머물고 멈춤
+      clearInterval(prayerTimer); prayerTimer=null;
+      hint.textContent="이거면 충분해 — 천천히.";
+      return;
+    }
+    render();
+  },5200); // ~12줄 × 5.2s ≈ 62s
+}
+function stopPrayer(){ if(prayerTimer){clearInterval(prayerTimer);prayerTimer=null;} }
 
 /* ============================================================
    말씀
@@ -540,7 +609,7 @@ function renderLog(){
   // 이번 주(월~) 호흡/말씀 멈춤 횟수
   const now=new Date(); const day=(now.getDay()+6)%7;
   const weekStart=new Date(now); weekStart.setHours(0,0,0,0); weekStart.setDate(now.getDate()-day);
-  const week=log.filter(e=>new Date(e.ts)>=weekStart && (e.type==="breath"||e.type==="word")).length;
+  const week=log.filter(e=>new Date(e.ts)>=weekStart && (e.type==="breath"||e.type==="word"||e.type==="prayer")).length;
   document.getElementById("weekCount").textContent=week;
   // 오늘 건드린 것
   const today=new Date(); today.setHours(0,0,0,0);
@@ -548,7 +617,7 @@ function renderLog(){
   const list=document.getElementById("logList"); list.innerHTML="";
   if(!items.length){ const e=document.createElement("div"); e.className="log-item";
     e.innerHTML="<span style='color:var(--ink-faint)'>아직 비어 있어 — 그것도 괜찮아.</span>"; list.appendChild(e); }
-  const names={breath:"🌬️ 호흡",word:"🙏 말씀",fivemin:"⏳ 3분"};
+  const names={breath:"🌬️ 호흡",word:"🙏 말씀",prayer:"🕯️ 기도",fivemin:"⏳ 3분"};
   items.forEach(e=>{
     const row=document.createElement("div"); row.className="log-item";
     const t=new Date(e.ts); const hm=String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");
@@ -578,6 +647,7 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
   const t=b.dataset.go;
   if(t==="lol"){ lolEnter(); return; }
   if(t==="word"){ lolFlag=false; show("word"); return; }
+  if(t==="prayer"){ lolFlag=false; show("prayer"); return; }
   if(t==="breath"){ lolFlag=false; show("breath"); return; }
   if(t==="done"){ finishDone(); return; }
   show(t);
