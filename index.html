@@ -116,6 +116,12 @@ body{
 @keyframes glowpulse{0%,100%{opacity:.5;transform:scale(.95);}50%{opacity:.85;transform:scale(1.06);}}
 .prayer-line{position:relative;z-index:2;font-size:22px;font-weight:600;line-height:1.6;
   max-width:300px;letter-spacing:-.01em;transition:opacity .8s ease;}
+.center-word{position:relative;z-index:2;font-size:36px;font-weight:700;letter-spacing:.01em;
+  animation:wordbreathe 9s ease-in-out infinite;}
+@keyframes wordbreathe{0%,100%{transform:scale(.97);opacity:.9;}50%{transform:scale(1.05);opacity:1;}}
+.center-gloss{font-size:14.5px;color:var(--ink-soft);margin-top:-4px;font-weight:500;}
+.chip .cw{font-size:19px;font-weight:650;}
+.chip .cg{display:block;font-size:13px;font-weight:450;color:var(--ink-soft);margin-top:4px;}
 
 /* corner controls */
 .corner{position:fixed;top:max(16px,env(safe-area-inset-top));right:18px;display:flex;gap:6px;z-index:20;}
@@ -243,6 +249,7 @@ body{
       <div class="modes">
         <button class="btn mode" data-go="word"><span class="emoji">🙏</span><span><span class="t">말씀</span><span class="sub">한 구절 읽기</span></span></button>
         <button class="btn mode" data-go="prayer"><span class="emoji">🕯️</span><span><span class="t">기도</span><span class="sub">눈 감고 천천히 주기도문</span></span></button>
+        <button class="btn mode" data-go="cpick"><span class="emoji">🕊️</span><span><span class="t">고요</span><span class="sub">거룩한 이름 하나에 머물기</span></span></button>
         <button class="btn mode" data-go="breath"><span class="emoji">🌬️</span><span><span class="t">호흡</span><span class="sub">같이 숨 쉬기</span></span></button>
       </div>
       <button class="softlink" data-go="lol">🎮 롤 켜기 전이야?</button>
@@ -283,6 +290,28 @@ body{
       </div>
       <div class="fade-line" id="prayerHint">눈 감고 외워도, 천천히 읽어도 좋아.</div>
       <button class="btn btn-soft" data-enough="prayer">이거면 충분해</button>
+    </div>
+  </section>
+
+  <!-- CENTER: 단어 고르기 -->
+  <section class="screen" data-screen="cpick">
+    <div class="wrap">
+      <div class="title">오늘 머물 한 단어,<br>하나만 골라.</div>
+      <div class="chips" id="centerChips"></div>
+      <button class="softlink" id="centerReshuffle">🕊️ 다른 단어 보여줘</button>
+    </div>
+  </section>
+
+  <!-- CENTER: 머물기 -->
+  <section class="screen" data-screen="center">
+    <div class="wrap">
+      <div class="prayer-stage">
+        <div class="prayer-glow"></div>
+        <div class="center-word" id="centerWord"></div>
+      </div>
+      <div class="center-gloss" id="centerGloss"></div>
+      <div class="fade-line">딴 생각이 나면, 이 단어로 살며시 돌아와.</div>
+      <button class="btn btn-soft" data-enough="center">이거면 충분해</button>
     </div>
   </section>
 
@@ -451,6 +480,8 @@ function show(name){
   screens[name].classList.add("active");
   if(name==="breath") startBreath(); else stopBreath();
   if(name==="prayer") startPrayer(); else stopPrayer();
+  if(name==="cpick") renderCenterChips();
+  if(name==="center") startCenter();
   if(name==="word") loadVerse();
   if(name==="one") renderChips();
   if(name==="timer") startTimer();
@@ -526,6 +557,49 @@ function startPrayer(){
   },5200); // ~12줄 × 5.2s ≈ 62s
 }
 function stopPrayer(){ if(prayerTimer){clearInterval(prayerTimer);prayerTimer=null;} }
+
+/* ============================================================
+   고요 기도 (센터링) — 거룩한 이름 하나에 머물기
+   ============================================================ */
+const CENTER_WORDS = [
+  {w:"예수",     g:"나의 구원자"},
+  {w:"여호와",   g:"스스로 계신 분"},
+  {w:"호산나",   g:"이제 구원하소서"},
+  {w:"임마누엘", g:"하나님이 우리와 함께"},
+  {w:"아바",     g:"아버지"},
+  {w:"할렐루야", g:"주를 찬양하라"},
+  {w:"마라나타", g:"오소서, 주 예수여"},
+  {w:"엘 샤다이", g:"전능하신 하나님"},
+  {w:"아도나이", g:"나의 주(主)"},
+  {w:"거룩",     g:"거룩하신 주"},
+  {w:"샬롬",     g:"주께서 주시는 평강"},
+  {w:"보혜사",   g:"늘 함께하시는 성령"},
+  {w:"어린양",   g:"죄를 지신 주"},
+  {w:"반석",     g:"나의 피할 바위"},
+  {w:"영광",     g:"주께 영광"},
+];
+let centerChoice=null;
+function pickCenter3(){
+  const a=CENTER_WORDS.slice(), out=[];
+  for(let i=0;i<3 && a.length;i++) out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);
+  return out;
+}
+function renderCenterChips(){
+  const box=document.getElementById("centerChips"); box.innerHTML="";
+  pickCenter3().forEach(item=>{
+    const b=document.createElement("button"); b.className="chip";
+    b.innerHTML="<span class='cw'>"+item.w+"</span><span class='cg'>"+item.g+"</span>";
+    b.addEventListener("pointerdown",ripple);
+    b.addEventListener("click",()=>{ centerChoice=item; show("center"); });
+    box.appendChild(b);
+  });
+}
+function startCenter(){
+  if(!centerChoice) centerChoice=CENTER_WORDS[Math.floor(Math.random()*CENTER_WORDS.length)];
+  document.getElementById("centerWord").textContent=centerChoice.w;
+  document.getElementById("centerGloss").textContent=centerChoice.g;
+}
+document.getElementById("centerReshuffle").addEventListener("click",renderCenterChips);
 
 /* ============================================================
    말씀
@@ -609,7 +683,7 @@ function renderLog(){
   // 이번 주(월~) 호흡/말씀 멈춤 횟수
   const now=new Date(); const day=(now.getDay()+6)%7;
   const weekStart=new Date(now); weekStart.setHours(0,0,0,0); weekStart.setDate(now.getDate()-day);
-  const week=log.filter(e=>new Date(e.ts)>=weekStart && (e.type==="breath"||e.type==="word"||e.type==="prayer")).length;
+  const week=log.filter(e=>new Date(e.ts)>=weekStart && (e.type==="breath"||e.type==="word"||e.type==="prayer"||e.type==="center")).length;
   document.getElementById("weekCount").textContent=week;
   // 오늘 건드린 것
   const today=new Date(); today.setHours(0,0,0,0);
@@ -617,7 +691,7 @@ function renderLog(){
   const list=document.getElementById("logList"); list.innerHTML="";
   if(!items.length){ const e=document.createElement("div"); e.className="log-item";
     e.innerHTML="<span style='color:var(--ink-faint)'>아직 비어 있어 — 그것도 괜찮아.</span>"; list.appendChild(e); }
-  const names={breath:"🌬️ 호흡",word:"🙏 말씀",prayer:"🕯️ 기도",fivemin:"⏳ 3분"};
+  const names={breath:"🌬️ 호흡",word:"🙏 말씀",prayer:"🕯️ 기도",center:"🕊️ 고요",fivemin:"⏳ 3분"};
   items.forEach(e=>{
     const row=document.createElement("div"); row.className="log-item";
     const t=new Date(e.ts); const hm=String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");
@@ -648,6 +722,7 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
   if(t==="lol"){ lolEnter(); return; }
   if(t==="word"){ lolFlag=false; show("word"); return; }
   if(t==="prayer"){ lolFlag=false; show("prayer"); return; }
+  if(t==="cpick"){ lolFlag=false; centerChoice=null; show("cpick"); return; }
   if(t==="breath"){ lolFlag=false; show("breath"); return; }
   if(t==="done"){ finishDone(); return; }
   show(t);
