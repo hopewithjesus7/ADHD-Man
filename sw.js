@@ -1,6 +1,6 @@
 /* 60초 리셋 — service worker (오프라인 캐시)
    bump CACHE 버전을 올리면 새 버전이 배포됨 */
-const CACHE = "reset60-v9";
+const CACHE = "reset60-v10";
 const CORE = [
   "./",
   "./index.html",
@@ -32,7 +32,21 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
-  // 같은 출처: 캐시 우선(오프라인 동작). 폰트 등 CDN: 받아서 캐시(런타임).
+  const isDoc = req.mode === "navigate" || req.destination === "document";
+  if (isDoc) {
+    // HTML: 네트워크 우선(항상 최신 반영) → 실패 시 캐시(오프라인)
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => { try { c.put(req, copy); } catch (_) {} });
+          return res;
+        })
+        .catch(() => caches.match(req).then((c) => c || caches.match("./index.html")))
+    );
+    return;
+  }
+  // 그 외(에셋·폰트): 캐시 우선(오프라인 동작 + 런타임 캐시)
   e.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;

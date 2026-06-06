@@ -43,6 +43,7 @@
   --r:28px;
   --serif:"Playfair Display",Georgia,"Times New Roman",serif;
   --serif-ko:"Nanum Myeongjo",Georgia,serif;  /* 고급 한글 명조 디스플레이용 — 바꾸려면 이 한 줄만 (예: "Gowun Batang", "Noto Serif KR") */
+  --shine:14s;  /* ethereal 빛남 한 사이클 길이 — 클수록 더 천천히 빤짝임 (예: 18s = 더 느리게) */
   --g-iris:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='ir' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f7cbe6'/><stop offset='.3' stop-color='%23cdc4f2'/><stop offset='.55' stop-color='%23bfe0f1'/><stop offset='.8' stop-color='%23d2eede'/><stop offset='1' stop-color='%23ecccef'/></linearGradient></defs><rect width='120' height='120' fill='url(%23ir)'/></svg>");
   --g-sheen:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='sh' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='%23ffe9f6' stop-opacity='0'/><stop offset='.4' stop-color='%23ffe9f6' stop-opacity='.6'/><stop offset='.6' stop-color='%23e6f0ff' stop-opacity='.6'/><stop offset='1' stop-color='%23e6f0ff' stop-opacity='0'/></linearGradient></defs><rect width='120' height='120' fill='url(%23sh)'/></svg>");
   --g-holo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' preserveAspectRatio='none'><defs><linearGradient id='ho' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ffd9ec'/><stop offset='.25' stop-color='%23d6c6f6'/><stop offset='.5' stop-color='%23c2e6f2'/><stop offset='.75' stop-color='%23d9f0df'/><stop offset='1' stop-color='%23ffe6cf'/></linearGradient></defs><rect width='200' height='200' fill='url(%23ho)'/></svg>");
@@ -152,11 +153,11 @@ body{
   mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;}
 .mode::after{content:"";position:absolute;top:0;left:-72%;width:56%;height:100%;pointer-events:none;z-index:1;
   background:var(--g-sheen) center/cover no-repeat;transform:skewX(-16deg);mix-blend-mode:screen;opacity:0;
-  animation:sheen 9s ease-in-out infinite;}
+  animation:sheen var(--shine) ease-in-out infinite;}
 .mode:nth-child(1)::after{animation-delay:0s;}
-.mode:nth-child(2)::after{animation-delay:1.8s;}
-.mode:nth-child(3)::after{animation-delay:3.6s;}
-.mode:nth-child(4)::after{animation-delay:5.4s;}
+.mode:nth-child(2)::after{animation-delay:calc(var(--shine)*0.2);}
+.mode:nth-child(3)::after{animation-delay:calc(var(--shine)*0.4);}
+.mode:nth-child(4)::after{animation-delay:calc(var(--shine)*0.6);}
 .mode>*{position:relative;z-index:2;}
 @keyframes sheen{0%{left:-72%;opacity:0;}6%{opacity:.8;}24%{left:130%;opacity:0;}100%{left:130%;opacity:0;}}
 
@@ -247,14 +248,14 @@ body{
   background:linear-gradient(100deg,#5f5896 0%,#5f5896 38%,#ffffff 50%,#c6bbf0 60%,#5f5896 72%,#5f5896 100%);
   background-size:260% 100%;-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;color:transparent;
-  text-shadow:0 0 9px rgba(255,255,255,.42);animation:shimmerText 9s linear infinite;}
+  text-shadow:0 0 9px rgba(255,255,255,.42);animation:shimmerText var(--shine) linear infinite;}
 .mt .t{font-weight:700;}
-/* 홈 웨이브: 말씀 0s → 기도 1.8 → 고요 3.6 → 호흡 5.4 → 60초 리셋 7.2 → 반복 */
+/* 홈 웨이브: 말씀 0 → 기도 → 고요 → 호흡 → 60초 리셋 → 반복 (속도는 :root --shine 한 줄로) */
 .mode:nth-child(1) .t{animation-delay:0s;}
-.mode:nth-child(2) .t{animation-delay:1.8s;}
-.mode:nth-child(3) .t{animation-delay:3.6s;}
-.mode:nth-child(4) .t{animation-delay:5.4s;}
-.wm-num,.wm-rest{animation-delay:7.2s;text-shadow:0 0 14px rgba(255,255,255,.5);}
+.mode:nth-child(2) .t{animation-delay:calc(var(--shine)*0.2);}
+.mode:nth-child(3) .t{animation-delay:calc(var(--shine)*0.4);}
+.mode:nth-child(4) .t{animation-delay:calc(var(--shine)*0.6);}
+.wm-num,.wm-rest{animation-delay:calc(var(--shine)*0.8);text-shadow:0 0 14px rgba(255,255,255,.5);}
 /* Pass3 — 기도 영문 보조 */
 .prayer-line .pk{display:block;}
 .prayer-line .pe{display:block;font-family:var(--serif);font-style:italic;font-weight:500;font-size:14.5px;letter-spacing:.01em;color:var(--ink-soft);margin-top:11px;opacity:.82;}
