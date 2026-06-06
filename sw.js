@@ -1,6 +1,6 @@
 /* 60초 리셋 — service worker (오프라인 캐시)
    bump CACHE 버전을 올리면 새 버전이 배포됨 */
-const CACHE = "reset60-v4";
+const CACHE = "reset60-v5";
 const CORE = [
   "./",
   "./index.html",
@@ -11,6 +11,10 @@ const CORE = [
   "./fonts/playfair-500.woff2",
   "./fonts/playfair-600.woff2",
   "./fonts/playfair-700.woff2",
+  "./fonts/playfair-italic-500.woff2",
+  "./assets/bg-b.png",
+  "./assets/orb.png",
+  // bg.mp4(약 6MB)는 일부러 프리캐시에서 제외 — 첫 설치 부담을 줄이고 fetch 핸들러가 런타임 캐시
 ];
 
 self.addEventListener("install", (e) => {

@@ -1,0 +1,10 @@
+# Claude Design 원본 export — 로컬 백업으로만 보관, 배포/repo에는 미포함
+Claude Design Upgrade/
+
+# 검증용 임시 산출물
+.verify.js
+reset_script.js
+
+# OS/에디터 부스러기
+.DS_Store
+Thumbs.db

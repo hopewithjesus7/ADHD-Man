@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="theme-color" content="#ece9f5" />
+<meta name="theme-color" content="#e9e6f6" />
+<meta name="color-scheme" content="light" />
+<meta name="supported-color-schemes" content="light" />
 <meta name="apple-mobile-web-app-title" content="60초 리셋" />
 <title>60초 리셋</title>
 <link rel="manifest" href="manifest.webmanifest" />
@@ -15,259 +17,329 @@
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <style>
 :root{
-  --bg-0:#efedf7;
-  --bg-1:#e7e8f4;
-  --sage:#d8d1f0;   /* iris lilac */
-  --sky:#c6cdec;    /* periwinkle */
-  --cream:#ecd9e6;  /* pearl rose */
-  --mint:#d2e6df;   /* whisper mint */
-  --ink:#37324c;
-  --ink-soft:#726d8a;
-  --ink-faint:#a8a3bb;
-  --accent:#8f88c6;
-  --accent-deep:#6f68aa;
-  --glass:rgba(255,255,255,.5);
-  --glass-strong:rgba(255,255,255,.66);
-  --glass-line:rgba(255,255,255,.72);
-  --shadow:0 22px 60px -24px rgba(72,62,116,.42);
-  --shadow-soft:0 12px 34px -18px rgba(72,62,116,.34);
-  --r:26px;
+  color-scheme:light;
+  /* image-backed surfaces survive WebView/Chrome forced-dark darkening */
+  --g-glass:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='a' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23fefdff' stop-opacity='.74'/><stop offset='.45' stop-color='%23f4effc' stop-opacity='.5'/><stop offset='.75' stop-color='%23fdeff8' stop-opacity='.44'/><stop offset='1' stop-color='%23eef1fd' stop-opacity='.42'/></linearGradient></defs><rect width='120' height='120' fill='url(%23a)'/></svg>");
+  --g-strong:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='b' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ffffff' stop-opacity='.88'/><stop offset='.5' stop-color='%23f6f2fd' stop-opacity='.66'/><stop offset='1' stop-color='%23fdf1f8' stop-opacity='.6'/></linearGradient></defs><rect width='120' height='120' fill='url(%23b)'/></svg>");
+  --g-pearl:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><defs><radialGradient id='c' cx='34%' cy='28%' r='86%'><stop offset='0' stop-color='white' stop-opacity='.98'/><stop offset='.5' stop-color='%23e7e1f8'/><stop offset='1' stop-color='%23d2cbee'/></radialGradient></defs><rect width='100' height='100' fill='url(%23c)'/></svg>");
+  --g-accent:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='d' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ab9fe4'/><stop offset='1' stop-color='%237a6dc2'/></linearGradient></defs><rect width='120' height='120' fill='url(%23d)'/></svg>");
+  --g-halo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><defs><radialGradient id='e' cx='50%' cy='50%' r='50%'><stop offset='0' stop-color='white' stop-opacity='.92'/><stop offset='.38' stop-color='%23f1ebfc' stop-opacity='.5'/><stop offset='.68' stop-color='%23d8d0f5' stop-opacity='.16'/><stop offset='1' stop-color='white' stop-opacity='0'/></radialGradient></defs><rect width='100' height='100' fill='url(%23e)'/></svg>");
+  --g-veil:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' preserveAspectRatio='none'><defs><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23fdfcff' stop-opacity='.3'/><stop offset='.5' stop-color='%23f6f1fc' stop-opacity='.06'/><stop offset='1' stop-color='%23e7e1fb' stop-opacity='.28'/></linearGradient></defs><rect width='100' height='100' fill='url(%23f)'/></svg>");
+  --ink:#4b4570;
+  --ink-soft:#7a7398;
+  --ink-faint:#a9a2c4;
+  --accent:#9a8fd4;
+  --accent-deep:#7a6fc0;
+  --glass:rgba(255,255,255,.42);
+  --glass-strong:rgba(255,255,255,.62);
+  --glass-line:rgba(255,255,255,.85);
+  --hair:rgba(140,128,190,.16);
+  --shadow:0 26px 70px -28px rgba(96,82,150,.5);
+  --shadow-soft:0 16px 40px -20px rgba(96,82,150,.42);
+  --r:28px;
   --serif:"Playfair Display",Georgia,"Times New Roman",serif;
+  --g-iris:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='ir' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f7cbe6'/><stop offset='.3' stop-color='%23cdc4f2'/><stop offset='.55' stop-color='%23bfe0f1'/><stop offset='.8' stop-color='%23d2eede'/><stop offset='1' stop-color='%23ecccef'/></linearGradient></defs><rect width='120' height='120' fill='url(%23ir)'/></svg>");
+  --g-sheen:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='sh' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='%23ffe9f6' stop-opacity='0'/><stop offset='.4' stop-color='%23ffe9f6' stop-opacity='.6'/><stop offset='.6' stop-color='%23e6f0ff' stop-opacity='.6'/><stop offset='1' stop-color='%23e6f0ff' stop-opacity='0'/></linearGradient></defs><rect width='120' height='120' fill='url(%23sh)'/></svg>");
+  --g-holo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' preserveAspectRatio='none'><defs><linearGradient id='ho' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ffd9ec'/><stop offset='.25' stop-color='%23d6c6f6'/><stop offset='.5' stop-color='%23c2e6f2'/><stop offset='.75' stop-color='%23d9f0df'/><stop offset='1' stop-color='%23ffe6cf'/></linearGradient></defs><rect width='200' height='200' fill='url(%23ho)'/></svg>");
   --ease:cubic-bezier(.22,.61,.36,1);
 }
 @font-face{font-family:"Playfair Display";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/playfair-500.woff2") format("woff2");}
 @font-face{font-family:"Playfair Display";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/playfair-600.woff2") format("woff2");}
 @font-face{font-family:"Playfair Display";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/playfair-700.woff2") format("woff2");}
+@font-face{font-family:"Playfair Display";font-style:italic;font-weight:500;font-display:swap;src:url("fonts/playfair-italic-500.woff2") format("woff2");}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;margin:0;}
+html{background:#e9e6f6;}
 body{
   font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   color:var(--ink);
-  background:var(--bg-0);
+  background:#e9e6f6;
+  color-scheme:light;
+  /* image-backed surfaces survive WebView/Chrome forced-dark darkening */
+  --g-glass:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='a' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23fefdff' stop-opacity='.74'/><stop offset='.45' stop-color='%23f4effc' stop-opacity='.5'/><stop offset='.75' stop-color='%23fdeff8' stop-opacity='.44'/><stop offset='1' stop-color='%23eef1fd' stop-opacity='.42'/></linearGradient></defs><rect width='120' height='120' fill='url(%23a)'/></svg>");
+  --g-strong:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='b' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ffffff' stop-opacity='.88'/><stop offset='.5' stop-color='%23f6f2fd' stop-opacity='.66'/><stop offset='1' stop-color='%23fdf1f8' stop-opacity='.6'/></linearGradient></defs><rect width='120' height='120' fill='url(%23b)'/></svg>");
+  --g-pearl:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><defs><radialGradient id='c' cx='34%' cy='28%' r='86%'><stop offset='0' stop-color='white' stop-opacity='.98'/><stop offset='.5' stop-color='%23e7e1f8'/><stop offset='1' stop-color='%23d2cbee'/></radialGradient></defs><rect width='100' height='100' fill='url(%23c)'/></svg>");
+  --g-accent:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='d' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ab9fe4'/><stop offset='1' stop-color='%237a6dc2'/></linearGradient></defs><rect width='120' height='120' fill='url(%23d)'/></svg>");
+  --g-halo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><defs><radialGradient id='e' cx='50%' cy='50%' r='50%'><stop offset='0' stop-color='white' stop-opacity='.92'/><stop offset='.38' stop-color='%23f1ebfc' stop-opacity='.5'/><stop offset='.68' stop-color='%23d8d0f5' stop-opacity='.16'/><stop offset='1' stop-color='white' stop-opacity='0'/></radialGradient></defs><rect width='100' height='100' fill='url(%23e)'/></svg>");
+  --g-veil:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' preserveAspectRatio='none'><defs><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23fdfcff' stop-opacity='.3'/><stop offset='.5' stop-color='%23f6f1fc' stop-opacity='.06'/><stop offset='1' stop-color='%23e7e1fb' stop-opacity='.28'/></linearGradient></defs><rect width='100' height='100' fill='url(%23f)'/></svg>");
   overflow:hidden;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
 }
 
-/* ---------- ambient aurora background ---------- */
-.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;background:
-  linear-gradient(160deg,var(--bg-0),var(--bg-1));}
-.aurora span{position:absolute;border-radius:50%;filter:blur(66px);opacity:.55;
-  mix-blend-mode:multiply;will-change:transform;}
-.blob1{width:62vmax;height:62vmax;left:-22vmax;top:-26vmax;background:radial-gradient(circle,var(--sage),transparent 68%);animation:drift1 28s var(--ease) infinite alternate;}
-.blob2{width:54vmax;height:54vmax;right:-20vmax;top:-10vmax;background:radial-gradient(circle,var(--sky),transparent 68%);animation:drift2 34s var(--ease) infinite alternate;}
-.blob3{width:50vmax;height:50vmax;left:8vmax;bottom:-28vmax;background:radial-gradient(circle,var(--cream),transparent 70%);animation:drift3 32s var(--ease) infinite alternate;}
-.blob4{width:46vmax;height:46vmax;right:-10vmax;bottom:-22vmax;opacity:.4;background:radial-gradient(circle,var(--mint),transparent 72%);animation:drift1 38s var(--ease) infinite alternate;}
-@keyframes drift1{to{transform:translate3d(8vmax,10vmax,0) scale(1.12);}}
-@keyframes drift2{to{transform:translate3d(-7vmax,9vmax,0) scale(1.08);}}
-@keyframes drift3{to{transform:translate3d(6vmax,-8vmax,0) scale(1.1);}}
-.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.035;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+/* ---------- background ---------- */
+.bg-img{position:fixed;inset:-6%;z-index:0;background-color:#e6e2f4;background-image:url("assets/bg-b.png");background-position:center;background-size:cover;background-repeat:no-repeat;
+  will-change:transform;animation:bgdrift 46s ease-in-out infinite alternate;}
+.bg-flow{position:fixed;inset:-14%;z-index:0;pointer-events:none;background:url("assets/bg-b.png") center/cover no-repeat;
+  filter:blur(11px) saturate(1.12);opacity:.65;mix-blend-mode:soft-light;will-change:transform;
+  animation:bgflow 58s ease-in-out infinite alternate;}
+@keyframes bgflow{0%{transform:scale(1.22) translate3d(3%,2%,0) rotate(.6deg);}100%{transform:scale(1.34) translate3d(-3.5%,-3%,0) rotate(-1deg);}}
+.bg-shimmer{position:fixed;inset:-25%;z-index:0;pointer-events:none;background:var(--g-holo) center/cover no-repeat;
+  mix-blend-mode:soft-light;opacity:.5;will-change:transform;animation:bgholo 52s linear infinite;}
+@keyframes bgholo{0%{transform:rotate(0deg) scale(1.45);}100%{transform:rotate(360deg) scale(1.45);}}
+.bg-vid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;
+  opacity:0;background:transparent;transition:none;}
+@keyframes bgdrift{
+  0%{transform:scale(1.05) translate3d(0,0,0);}
+  100%{transform:scale(1.16) translate3d(-2.4%,-2.6%,0);}
+}
+.bg-veil{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:var(--g-veil) center/cover no-repeat;}
+.bg-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;
+  box-shadow:inset 0 0 180px 40px rgba(120,106,170,.18);}
+.grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.04;mix-blend-mode:soft-light;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+
+/* ---------- icons ---------- */
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.ic-fill{fill:currentColor;stroke:none;}
+.sprite{position:absolute;width:0;height:0;overflow:hidden;}
 
 /* ---------- layout ---------- */
-#app{position:relative;height:100dvh;width:100%;display:flex;align-items:center;justify-content:center;
+#app{position:relative;z-index:1;height:100dvh;width:100%;display:flex;align-items:center;justify-content:center;
   padding:max(22px,env(safe-area-inset-top)) 22px max(26px,env(safe-area-inset-bottom));}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:max(40px,env(safe-area-inset-top)) 24px max(36px,env(safe-area-inset-bottom));
-  gap:22px;text-align:center;opacity:0;transform:translateY(14px) scale(.992);
-  pointer-events:none;transition:opacity .6s var(--ease),transform .6s var(--ease);}
+  padding:max(54px,env(safe-area-inset-top)) 26px max(40px,env(safe-area-inset-bottom));
+  gap:22px;text-align:center;opacity:0;transform:translateY(16px) scale(.99);
+  pointer-events:none;transition:opacity .7s var(--ease),transform .7s var(--ease);}
 .screen.active{opacity:1;transform:none;pointer-events:auto;}
-.wrap{width:100%;max-width:440px;display:flex;flex-direction:column;align-items:center;gap:19px;}
+.wrap{width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;gap:20px;}
 
 /* ---------- typography ---------- */
-.kicker{font-size:14px;letter-spacing:.04em;color:var(--ink-soft);font-weight:500;}
-.title{font-size:clamp(24px,6.6vw,31px);font-weight:600;line-height:1.5;letter-spacing:-.012em;}
-.lead{font-size:17px;line-height:1.7;color:var(--ink-soft);font-weight:450;}
-.fade-line{font-size:15px;color:var(--accent-deep);font-weight:500;min-height:21px;letter-spacing:.005em;}
+.title{font-size:clamp(25px,6.8vw,32px);font-weight:600;line-height:1.5;letter-spacing:-.01em;
+  text-wrap:pretty;}
+.title .em{font-family:var(--serif);font-style:italic;font-weight:500;}
+.lead{font-size:17px;line-height:1.7;color:var(--ink-soft);font-weight:450;text-wrap:pretty;}
+.fade-line{font-size:14.5px;color:var(--accent-deep);font-weight:500;min-height:20px;letter-spacing:.005em;opacity:.9;}
 
-/* wordmark masthead */
-.wordmark{display:flex;flex-direction:column;align-items:center;gap:5px;}
-.wm-line{display:flex;align-items:baseline;gap:.32em;font-size:15px;letter-spacing:.28em;
-  color:var(--ink-soft);font-weight:500;text-indent:.28em;}
-.wm-num{font-family:var(--serif);font-size:34px;letter-spacing:0;color:var(--ink);font-weight:600;line-height:.9;}
-.wm-tag{font-size:12.5px;letter-spacing:.06em;color:var(--ink-faint);}
+/* wordmark */
+.wordmark{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:4px;}
+.wm-line{display:flex;align-items:baseline;gap:.26em;white-space:nowrap;}
+.wm-num{font-family:var(--serif);font-size:42px;letter-spacing:.01em;color:var(--ink);font-weight:600;line-height:.9;}
+.wm-rest{font-size:19px;letter-spacing:.06em;color:#6f6896;font-weight:500;}
+.wm-tag{font-size:12px;letter-spacing:.28em;color:#5f5788;font-weight:600;text-indent:.28em;text-transform:uppercase;}
 
-/* ---------- glass buttons ---------- */
+/* ---------- glass primitives ---------- */
 .btn{position:relative;overflow:hidden;border:1px solid var(--glass-line);
-  background:linear-gradient(135deg,rgba(255,255,255,.5),rgba(255,255,255,0) 46%),var(--glass);
-  backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35);
+  background:var(--g-glass) center/cover no-repeat;
+  backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);
   color:var(--ink);font-family:inherit;font-weight:600;cursor:pointer;
-  border-radius:var(--r);box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.75);
-  transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .35s var(--ease);
+  border-radius:var(--r);box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -10px 22px -16px rgba(150,135,200,.5);
+  transition:transform .4s var(--ease),box-shadow .4s var(--ease);
   -webkit-user-select:none;user-select:none;}
-.btn:active{transform:scale(.975);box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.75),0 0 0 6px rgba(143,136,198,.1);}
-.btn-xl{width:100%;padding:26px 22px;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:8px;}
-.btn-xl .emoji{font-size:30px;line-height:1;}
-.btn-xl .sub{font-size:13px;font-weight:450;color:var(--ink-soft);}
-.btn-row{display:flex;gap:14px;width:100%;}
-.btn-row .btn-xl{flex:1;}
-.btn-primary{width:100%;padding:20px;font-size:18px;
-  background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(255,255,255,0) 44%),linear-gradient(135deg,var(--accent),var(--accent-deep));
-  color:#fff;border-color:transparent;box-shadow:0 18px 38px -16px rgba(110,104,170,.6),inset 0 1px 0 rgba(255,255,255,.4);}
-.btn-ghost{width:100%;padding:16px;font-size:15px;font-weight:500;color:var(--ink-soft);
-  background:transparent;border-color:transparent;box-shadow:none;}
-.btn-soft{width:100%;padding:18px;font-size:16px;}
-.ripple{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
-  background:radial-gradient(circle,rgba(255,255,255,.85),rgba(255,255,255,0) 70%);
-  pointer-events:none;animation:rip .7s var(--ease) forwards;mix-blend-mode:overlay;}
-@keyframes rip{to{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+.btn:active{transform:scale(.975);}
 
-/* small entry / link */
-.softlink{background:none;border:none;color:var(--ink-soft);font-family:inherit;font-size:15px;
-  font-weight:500;cursor:pointer;padding:12px 16px;border-radius:16px;transition:color .3s;}
+/* home mode rows */
+.modes{display:flex;flex-direction:column;gap:13px;width:100%;}
+.mode{display:flex;align-items:center;gap:16px;width:100%;padding:16px 18px;text-align:left;border-radius:24px;position:relative;}
+.badge{flex:none;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:23px;color:var(--accent-deep);
+  background:var(--g-pearl) center/cover no-repeat;
+  box-shadow:inset -3px -4px 10px rgba(150,135,200,.34),inset 3px 3px 9px rgba(255,255,255,.9),0 8px 18px -10px rgba(120,104,180,.5);}
+.mt{display:flex;flex-direction:column;gap:2px;}
+.mt .t{font-size:17.5px;font-weight:650;letter-spacing:-.01em;}
+.mt .sub{font-size:13px;font-weight:450;color:var(--ink-soft);}
+/* iridescent pearl border + slow satin sheen */
+.mode::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;opacity:.8;pointer-events:none;z-index:0;
+  background:var(--g-iris) center/cover no-repeat;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;}
+.mode::after{content:"";position:absolute;top:0;left:-72%;width:56%;height:100%;pointer-events:none;z-index:1;
+  background:var(--g-sheen) center/cover no-repeat;transform:skewX(-16deg);mix-blend-mode:screen;opacity:0;
+  animation:sheen 7.2s ease-in-out infinite;}
+.mode:nth-child(1)::after{animation-delay:.2s;}
+.mode:nth-child(2)::after{animation-delay:1.9s;}
+.mode:nth-child(3)::after{animation-delay:3.6s;}
+.mode:nth-child(4)::after{animation-delay:5.3s;}
+.mode>*{position:relative;z-index:2;}
+@keyframes sheen{0%{left:-72%;opacity:0;}6%{opacity:.8;}24%{left:130%;opacity:0;}100%{left:130%;opacity:0;}}
+
+/* soft enough button */
+.btn-soft{width:100%;max-width:300px;padding:18px;font-size:16px;font-weight:600;border-radius:22px;
+  display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:-.005em;}
+.btn-primary{width:100%;padding:19px;font-size:17px;border-radius:22px;color:#fff;border-color:transparent;
+  background:var(--g-accent) center/cover no-repeat;
+  box-shadow:0 20px 42px -18px rgba(120,104,180,.75),inset 0 1px 0 rgba(255,255,255,.55);}
+.btn-ghost{width:100%;padding:15px;font-size:15px;font-weight:500;color:var(--ink-soft);
+  background:transparent;border-color:transparent;box-shadow:none;backdrop-filter:none;}
+
+.softlink{display:inline-flex;align-items:center;gap:7px;background:none;border:none;color:var(--ink-soft);
+  font-family:inherit;font-size:14.5px;font-weight:500;cursor:pointer;padding:11px 16px;border-radius:16px;transition:color .3s;}
+.softlink .ic{font-size:16px;color:var(--accent);}
 .softlink:active{color:var(--accent-deep);}
 
-/* home mode pills (말씀 / 호흡 / 기도) */
-.modes{display:flex;flex-direction:column;gap:13px;width:100%;}
-.mode{display:flex;align-items:center;gap:16px;width:100%;padding:18px 22px;text-align:left;}
-.mode .emoji{font-size:26px;line-height:1;flex:none;}
-.mode .t{font-size:18px;font-weight:650;display:block;}
-.mode .sub{font-size:13px;font-weight:450;color:var(--ink-soft);display:block;margin-top:2px;}
-
-/* prayer mode */
-.prayer-stage{position:relative;width:100%;min-height:210px;display:flex;align-items:center;justify-content:center;}
-.prayer-glow{position:absolute;width:300px;height:300px;border-radius:50%;
-  background:radial-gradient(circle,rgba(198,205,236,.45),rgba(236,217,230,.2) 45%,transparent 72%);
-  filter:blur(16px);animation:glowpulse 9s ease-in-out infinite;}
-@keyframes glowpulse{0%,100%{opacity:.5;transform:scale(.95);}50%{opacity:.85;transform:scale(1.06);}}
-.prayer-line{position:relative;z-index:2;font-size:22px;font-weight:600;line-height:1.6;
-  max-width:300px;letter-spacing:-.01em;transition:opacity .8s ease;}
-.center-word{position:relative;z-index:2;font-size:36px;font-weight:700;letter-spacing:.01em;
-  animation:wordbreathe 9s ease-in-out infinite;}
-@keyframes wordbreathe{0%,100%{transform:scale(.97);opacity:.9;}50%{transform:scale(1.05);opacity:1;}}
-.center-gloss{font-size:14.5px;color:var(--ink-soft);margin-top:-4px;font-weight:500;}
-.chip .cw{font-size:19px;font-weight:650;}
-.chip .cg{display:block;font-size:13px;font-weight:450;color:var(--ink-soft);margin-top:4px;}
-
 /* corner controls */
-.corner{position:fixed;top:max(16px,env(safe-area-inset-top));right:18px;display:flex;gap:6px;z-index:20;}
-.icon-btn{width:42px;height:42px;border-radius:14px;border:1px solid var(--glass-line);
-  background:var(--glass);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;
-  font-size:18px;color:var(--ink-soft);cursor:pointer;transition:transform .3s var(--ease);}
+.corner{position:fixed;top:max(18px,env(safe-area-inset-top));right:20px;display:flex;gap:8px;z-index:20;}
+.icon-btn{width:44px;height:44px;border-radius:15px;border:1px solid var(--glass-line);
+  background:var(--g-strong) center/cover no-repeat;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink-soft);cursor:pointer;
+  box-shadow:0 8px 20px -12px rgba(110,96,170,.5),inset 0 1px 0 rgba(255,255,255,.85);
+  transition:transform .3s var(--ease);}
 .icon-btn:active{transform:scale(.9);}
 
+/* ripple */
+.ripple{position:absolute;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+  background:radial-gradient(circle,rgba(255,255,255,.9),rgba(255,255,255,0) 70%);
+  pointer-events:none;animation:rip .75s var(--ease) forwards;mix-blend-mode:overlay;}
+@keyframes rip{to{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+
 /* ---------- breathing orb ---------- */
-.orb-stage{position:relative;width:260px;height:260px;display:flex;align-items:center;justify-content:center;}
-.orb{position:absolute;width:164px;height:164px;border-radius:50%;overflow:hidden;
-  background:
-    radial-gradient(circle at 34% 26%,rgba(255,255,255,.95),rgba(255,255,255,0) 34%),
-    radial-gradient(circle at 72% 74%,rgba(236,217,230,.85),transparent 52%),
-    radial-gradient(circle at 26% 72%,rgba(198,205,236,.9),transparent 54%),
-    radial-gradient(circle at 64% 32%,rgba(216,209,240,.9),transparent 56%),
-    radial-gradient(circle,#f1f1fc 0%,#ddd9f0 62%,#cac6e8 100%);
-  box-shadow:0 24px 50px -12px rgba(120,108,176,.5),inset -10px -12px 34px rgba(150,138,196,.32),inset 10px 12px 30px rgba(255,255,255,.78);
-  animation:breathe 10s var(--ease) infinite;}
-.orb::before{content:"";position:absolute;inset:-20%;border-radius:50%;
-  background:conic-gradient(from 120deg,rgba(216,209,240,0),rgba(236,217,230,.55),rgba(198,205,236,.5),rgba(210,230,223,.45),rgba(216,209,240,0));
-  mix-blend-mode:screen;filter:blur(8px);opacity:.7;animation:spin 22s linear infinite;}
-.orb::after{content:"";position:absolute;top:15%;left:21%;width:34%;height:26%;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.92),transparent 70%);filter:blur(2px);}
-@keyframes spin{to{transform:rotate(360deg);}}
-.orb-halo{position:absolute;width:232px;height:232px;border-radius:50%;
-  background:radial-gradient(circle,rgba(198,205,236,.5),rgba(236,217,230,.22) 46%,transparent 68%);filter:blur(10px);
-  animation:breathe 10s var(--ease) infinite;}
+.orb-stage{position:relative;width:300px;height:300px;display:flex;align-items:center;justify-content:center;}
+.orb-halo{position:absolute;width:280px;height:280px;border-radius:50%;
+  background:var(--g-halo) center/cover no-repeat;
+  filter:blur(6px);animation:breathe 8s ease-in-out infinite;}
+.orb-img{position:absolute;width:198px;height:198px;object-fit:contain;
+  filter:drop-shadow(0 18px 40px rgba(140,120,200,.45));animation:breathe 8s ease-in-out infinite;will-change:transform;}
+.spark{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;}
 @keyframes breathe{
-  0%{transform:scale(.78);}
-  40%{transform:scale(1.18);}   /* 4s in */
-  50%{transform:scale(1.18);}
-  100%{transform:scale(.78);}   /* 6s out */
+  0%{transform:scale(.93);}
+  50%{transform:scale(1.06);}
+  100%{transform:scale(.93);}
 }
-.orb-word{position:relative;z-index:2;font-size:18px;font-weight:600;color:#4a4470;
-  text-shadow:0 1px 14px rgba(255,255,255,.85);letter-spacing:.02em;}
+.orb-word{position:relative;z-index:3;font-family:var(--serif);font-style:italic;font-size:22px;font-weight:500;
+  color:#5b5388;text-shadow:0 1px 18px rgba(255,255,255,.9);letter-spacing:.01em;transition:opacity .5s ease;}
 
 /* ---------- verse ---------- */
 .verse-card{width:100%;border:1px solid var(--glass-line);
-  background:linear-gradient(135deg,rgba(255,255,255,.45),rgba(255,255,255,0) 52%),var(--glass-strong);
-  border-radius:var(--r);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.8);padding:30px 26px;backdrop-filter:blur(20px);
-  display:flex;flex-direction:column;gap:18px;}
-.verse-text{font-size:19px;line-height:1.85;font-weight:500;letter-spacing:-.01em;}
-.verse-ref{font-size:14px;color:var(--accent-deep);font-weight:600;letter-spacing:.02em;}
-.verse-pray{font-size:15px;line-height:1.7;color:var(--ink-soft);padding-top:16px;border-top:1px solid rgba(120,116,150,.2);}
-.verse-empty{font-size:15px;color:var(--ink-faint);line-height:1.7;}
+  background:var(--g-strong) center/cover no-repeat;
+  border-radius:var(--r);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.92);
+  padding:32px 28px;backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);
+  display:flex;flex-direction:column;gap:18px;text-align:left;}
+.verse-ref{font-family:var(--serif);font-size:16px;color:var(--accent-deep);font-weight:600;letter-spacing:.01em;}
+.verse-text{font-size:18.5px;line-height:1.9;font-weight:500;letter-spacing:-.01em;}
+.verse-pray{font-size:14.5px;line-height:1.7;color:var(--ink-soft);padding-top:16px;border-top:1px solid var(--hair);}
 
-/* ---------- one-thing chips ---------- */
+/* ---------- chips ---------- */
 .chips{display:flex;flex-direction:column;gap:12px;width:100%;}
-.chip{position:relative;overflow:hidden;width:100%;padding:20px;border-radius:20px;
-  border:1px solid var(--glass-line);backdrop-filter:blur(16px);
-  background:linear-gradient(135deg,rgba(255,255,255,.5),rgba(255,255,255,0) 48%),var(--glass);
+.chip{position:relative;overflow:hidden;width:100%;padding:20px;border-radius:22px;
+  border:1px solid var(--glass-line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  background:var(--g-glass) center/cover no-repeat;
   font-family:inherit;font-size:17px;font-weight:550;color:var(--ink);cursor:pointer;text-align:center;
-  box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.7);transition:transform .3s var(--ease);}
+  box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.85);transition:transform .3s var(--ease);}
 .chip:active{transform:scale(.97);}
+.chip .cw{font-family:var(--serif);font-size:21px;font-weight:600;}
+.chip .cg{display:block;font-size:12.5px;font-weight:450;color:var(--ink-soft);margin-top:5px;letter-spacing:.02em;}
 .input{width:100%;padding:18px;border-radius:18px;border:1px solid var(--glass-line);
-  background:var(--glass-strong);font-family:inherit;font-size:16px;color:var(--ink);
+  background:var(--g-strong) center/cover no-repeat;font-family:inherit;font-size:16px;color:var(--ink);
   text-align:center;outline:none;transition:border-color .3s,box-shadow .3s;}
 .input::placeholder{color:var(--ink-faint);}
-.input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(143,136,198,.2);}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(154,143,212,.22);}
+
+/* ---------- prayer / center stage ---------- */
+.prayer-stage{position:relative;width:300px;height:280px;display:flex;align-items:center;justify-content:center;}
+.prayer-glow{position:absolute;width:300px;height:300px;border-radius:50%;
+  background:var(--g-halo) center/cover no-repeat;
+  filter:blur(8px);animation:glowpulse 10s ease-in-out infinite;}
+@keyframes glowpulse{0%,100%{opacity:.55;transform:scale(.95);}50%{opacity:.95;transform:scale(1.08);}}
+.prayer-line{position:relative;z-index:3;font-size:22px;font-weight:600;line-height:1.7;
+  max-width:280px;letter-spacing:-.01em;transition:opacity .8s ease;text-wrap:balance;}
+.center-word{position:relative;z-index:3;font-family:var(--serif);font-size:42px;font-weight:600;letter-spacing:.01em;
+  color:#534b82;text-shadow:0 2px 22px rgba(255,255,255,.85);animation:wordbreathe 10s ease-in-out infinite;}
+@keyframes wordbreathe{0%,100%{transform:scale(.97);opacity:.92;}50%{transform:scale(1.05);opacity:1;}}
+.center-gloss{font-size:14.5px;color:var(--ink-soft);margin-top:-2px;font-weight:500;letter-spacing:.02em;}
 
 /* ---------- timer ring ---------- */
-.ring-stage{position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center;}
-.ring-stage svg{position:absolute;inset:0;transform:rotate(-90deg);}
-.ring-bg{fill:none;stroke:rgba(255,255,255,.55);stroke-width:10;}
-.ring-fg{fill:none;stroke:url(#g);stroke-width:10;stroke-linecap:round;
-  transition:stroke-dashoffset 1s linear;}
-.ring-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;}
-.ring-time{font-family:var(--serif);font-size:46px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
-.ring-thing{font-size:15px;color:var(--ink-soft);max-width:170px;line-height:1.5;}
+.ring-stage{position:relative;width:266px;height:266px;display:flex;align-items:center;justify-content:center;}
+.ring-core{position:absolute;width:210px;height:210px;border-radius:50%;
+  background:var(--g-halo) center/cover no-repeat;
+  filter:blur(4px);animation:glowpulse 8s ease-in-out infinite;}
+.ring-stage svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);z-index:1;}
+.ring-bg{fill:none;stroke:#d8d1ee;stroke-opacity:.6;stroke-width:9;}
+.ring-comet{fill:none;stroke:url(#cometgrad);stroke-width:10;stroke-linecap:round;
+  stroke-dasharray:42 649;filter:drop-shadow(0 0 10px rgba(222,205,252,1)) drop-shadow(0 0 3px rgba(255,255,255,.9));
+  transform-box:view-box;transform-origin:120px 120px;animation:ringspin 7s linear infinite;}
+@keyframes ringspin{to{transform:rotate(360deg);}}
+.ring-fg{fill:none;stroke:url(#ringgrad);stroke-width:9;stroke-linecap:round;
+  filter:drop-shadow(0 0 8px rgba(214,200,244,.95));transition:stroke-dashoffset 1s linear;}
+.ring-inner{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;gap:7px;}
+.ring-time{font-family:var(--serif);font-size:52px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.01em;
+  color:#534b82;text-shadow:0 2px 20px rgba(255,255,255,.8);}
+.ring-thing{font-size:14.5px;color:var(--ink-soft);max-width:170px;line-height:1.5;}
 
 /* ---------- log ---------- */
 .stat{width:100%;border:1px solid var(--glass-line);border-radius:var(--r);
-  background:linear-gradient(135deg,rgba(255,255,255,.45),rgba(255,255,255,0) 52%),var(--glass-strong);
-  padding:24px;box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.8);backdrop-filter:blur(18px);}
-.stat-label{font-size:14px;color:var(--ink-soft);font-weight:500;}
-.stat-num{font-family:var(--serif);font-size:50px;font-weight:600;color:var(--accent-deep);line-height:1.1;margin-top:6px;}
-.log-list{width:100%;display:flex;flex-direction:column;gap:10px;max-height:34vh;overflow-y:auto;
-  -webkit-overflow-scrolling:touch;}
-.log-item{background:var(--glass);border:1px solid var(--glass-line);border-radius:16px;padding:14px 18px;
-  font-size:15px;display:flex;justify-content:space-between;gap:12px;align-items:center;}
+  background:var(--g-strong) center/cover no-repeat;
+  padding:26px;box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.9);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);text-align:left;}
+.stat-label{font-size:13.5px;color:var(--ink-soft);font-weight:500;letter-spacing:.01em;}
+.stat-num{font-family:var(--serif);font-size:54px;font-weight:600;color:var(--accent-deep);line-height:1.1;margin-top:6px;}
+.log-head{align-self:flex-start;margin-left:6px;font-size:13.5px;color:var(--ink-soft);font-weight:550;}
+.log-list{width:100%;display:flex;flex-direction:column;gap:10px;max-height:32vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.log-item{background:var(--g-glass) center/cover no-repeat;border:1px solid var(--glass-line);border-radius:18px;padding:14px 18px;
+  font-size:15px;display:flex;justify-content:space-between;gap:12px;align-items:center;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.log-item .lh{display:inline-flex;align-items:center;gap:9px;}
+.log-item .lh .ic{font-size:17px;color:var(--accent-deep);}
 .log-item .when{font-size:13px;color:var(--ink-faint);flex:none;}
 
-/* ---------- modal (settings / verse edit) ---------- */
+/* ---------- modal ---------- */
 .modal{position:fixed;inset:0;z-index:40;display:none;align-items:flex-end;justify-content:center;
-  background:rgba(54,50,78,.34);backdrop-filter:blur(6px);}
+  background:rgba(70,62,108,.32);backdrop-filter:blur(8px);}
 .modal.open{display:flex;}
-.sheet{width:100%;max-width:480px;background:var(--glass-strong);backdrop-filter:blur(26px);
-  border:1px solid var(--glass-line);border-radius:28px 28px 0 0;box-shadow:0 -20px 60px -20px rgba(60,54,96,.42);
-  padding:24px 24px max(28px,env(safe-area-inset-bottom));max-height:88dvh;overflow-y:auto;
-  animation:rise .5s var(--ease);}
+.sheet{width:100%;max-width:480px;background:var(--g-strong) center/cover no-repeat;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+  border:1px solid var(--glass-line);border-radius:30px 30px 0 0;box-shadow:0 -24px 70px -24px rgba(70,60,110,.45);
+  padding:26px 26px max(30px,env(safe-area-inset-bottom));max-height:88dvh;overflow-y:auto;animation:rise .55s var(--ease);}
 @keyframes rise{from{transform:translateY(100%);}to{transform:none;}}
-.sheet h2{font-size:20px;margin:4px 0 18px;font-weight:700;}
-.row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 0;
-  border-top:1px solid rgba(120,116,150,.18);}
+.sheet h2{font-family:var(--serif);font-size:23px;margin:2px 0 18px;font-weight:600;}
+.row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 0;border-top:1px solid var(--hair);}
 .row:first-of-type{border-top:none;}
 .row .label{font-size:15px;font-weight:550;}
 .row .desc{font-size:13px;color:var(--ink-soft);margin-top:3px;line-height:1.5;}
-.toggle{width:52px;height:31px;border-radius:16px;border:none;background:rgba(120,116,150,.3);
-  position:relative;cursor:pointer;flex:none;transition:background .3s;}
-.toggle.on{background:var(--accent);}
-.toggle::after{content:"";position:absolute;top:3px;left:3px;width:25px;height:25px;border-radius:50%;
-  background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .3s var(--ease);}
+.toggle{width:52px;height:31px;border-radius:16px;border:none;background:rgba(140,128,190,.32);position:relative;cursor:pointer;flex:none;transition:background .3s;}
+.toggle.on{background:var(--g-accent) center/cover no-repeat;}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:25px;height:25px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .3s var(--ease);}
 .toggle.on::after{transform:translateX(21px);}
 .seg{display:flex;gap:6px;}
-.seg button{padding:9px 14px;border-radius:12px;border:1px solid var(--glass-line);background:var(--glass);
+.seg button{padding:9px 14px;border-radius:13px;border:1px solid var(--glass-line);background:var(--g-glass) center/cover no-repeat;
   font-family:inherit;font-size:14px;color:var(--ink-soft);cursor:pointer;font-weight:600;}
-.seg button.sel{background:var(--accent);color:#fff;border-color:transparent;}
-.time-in{padding:10px 12px;border-radius:12px;border:1px solid var(--glass-line);background:var(--glass);
-  font-family:inherit;font-size:15px;color:var(--ink);}
-.sheet textarea{width:100%;min-height:90px;border-radius:16px;border:1px solid var(--glass-line);
-  background:var(--glass);font-family:inherit;font-size:15px;padding:14px;color:var(--ink);resize:vertical;outline:none;line-height:1.6;}
-.sheet .hint{font-size:12.5px;color:var(--ink-faint);line-height:1.6;margin-top:10px;}
-.sheet .verse-pick{font-size:14px;color:var(--accent-deep);font-weight:600;}
-.close-x{float:right;font-size:15px;color:var(--ink-soft);background:none;border:none;cursor:pointer;font-family:inherit;}
+.seg button.sel{background:var(--g-accent) center/cover no-repeat;color:#fff;border-color:transparent;}
+.time-in{padding:10px 12px;border-radius:13px;border:1px solid var(--glass-line);background:var(--g-glass) center/cover no-repeat;font-family:inherit;font-size:15px;color:var(--ink);}
+.sheet .hint{font-size:12.5px;color:var(--ink-faint);line-height:1.6;margin-top:12px;}
+.close-x{float:right;font-size:14.5px;color:var(--ink-soft);background:none;border:none;cursor:pointer;font-family:inherit;}
 
 @media (prefers-reduced-motion:reduce){
-  *{animation-duration:.001ms!important;transition-duration:.18s!important;}
-  .orb,.orb-halo,.orb::before,.center-word,.prayer-glow{animation:none!important;}
-  .orb,.orb-halo{transform:scale(1);}
+  *{animation-duration:.001ms!important;}
+  .orb-img,.orb-halo,.center-word,.prayer-glow,.ring-core,.bg-img{animation:none!important;transform:none!important;}
+  .orb-img,.orb-halo{transform:scale(1)!important;}
+}
+@media (max-height:680px){
+  .orb-stage{width:260px;height:260px;}.orb-img{width:170px;height:170px;}.orb-halo{width:240px;height:240px;}
+  .ring-stage{width:240px;height:240px;}
 }
 </style>
 </head>
 <body>
-<div class="aurora"><span class="blob1"></span><span class="blob2"></span><span class="blob3"></span><span class="blob4"></span></div>
+
+<!-- icon sprite -->
+<svg class="sprite" aria-hidden="true">
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.6C10.3 5.5 6.4 5 3.6 5.4V18.2C6.4 17.8 10.3 18.3 12 19.4"/><path d="M12 6.6C13.7 5.5 17.6 5 20.4 5.4V18.2C17.6 17.8 13.7 18.3 12 19.4"/><path d="M12 6.6V19.4"/></symbol>
+  <symbol id="i-candle" viewBox="0 0 24 24"><path d="M12 3.2c1.7 1.7 2.2 3.1 0 4.7-2.2-1.6-1.7-3 0-4.7Z"/><path d="M12 8.6v2"/><path d="M8.6 10.8h6.8v7.6a1.6 1.6 0 0 1-1.6 1.6h-3.6a1.6 1.6 0 0 1-1.6-1.6Z"/></symbol>
+  <symbol id="i-lotus" viewBox="0 0 24 24"><path d="M12 19c-1.7-3-1.7-6 0-9 1.7 3 1.7 6 0 9Z"/><path d="M12 19C9 18 6.8 15.4 6.4 12.4 9.3 12.9 11.2 15.6 12 19Z"/><path d="M12 19c3-1 5.2-3.6 5.6-6.6C14.7 12.9 12.8 15.6 12 19Z"/><path d="M12 19C8 18.4 4.2 16 3 13.4 6.2 12.6 9.8 14.8 12 19Z"/><path d="M12 19c4-.6 7.8-2.6 9-5.6-3.2-.8-6.8 1.2-9 5.6Z"/></symbol>
+  <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 8.6h9.4A2.2 2.2 0 1 0 10.2 6.4"/><path d="M3 12.6h13A2.4 2.4 0 1 1 13.6 15"/><path d="M3 16.6h7"/></symbol>
+  <symbol id="i-game" viewBox="0 0 24 24"><path d="M6.6 9h10.8a4 4 0 0 1 0 8c-1.2 0-1.9-.7-2.7-1.4H9.3C8.5 16.3 7.8 17 6.6 17a4 4 0 0 1 0-8Z"/><path d="M7.2 12v2.4M6 13.2h2.4"/><circle cx="15.6" cy="12.5" r=".9" class="ic-fill"/><circle cx="17.4" cy="14.2" r=".9" class="ic-fill"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11.5A8 8 0 1 0 18 17"/><path d="M20 5v6h-6"/></symbol>
+  <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 20v-7"/><path d="M12 13C12 10.2 9.8 8 7 8c0 2.8 2.2 5 5 5Z"/><path d="M12 11c0-2.8 2.2-5 5-5 0 2.8-2.2 5-5 5Z"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M4 8h9"/><circle cx="15.5" cy="8" r="2"/><path d="M18 8h2"/><path d="M4 16h3"/><circle cx="9.5" cy="16" r="2"/><path d="M12 16h8"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M9 6.8 18 12l-9 5.2Z" class="ic-fill"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 2"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.8 10.6 12 4l8.2 6.6"/><path d="M5.6 9.4V19a.8.8 0 0 0 .8.8h11.2a.8.8 0 0 0 .8-.8V9.4"/><path d="M9.8 19.8v-5.2h4.4v5.2"/></symbol>
+</svg>
+
+<div class="bg-img"></div>
+<div class="bg-flow"></div>
+<video class="bg-vid" id="bgVidA" autoplay muted playsinline preload="auto"><source src="assets/bg.mp4" type="video/mp4" /></video>
+<video class="bg-vid" id="bgVidB" autoplay muted playsinline preload="auto"><source src="assets/bg.mp4" type="video/mp4" /></video>
+<div class="bg-shimmer"></div>
+<div class="bg-veil"></div>
+<div class="bg-vignette"></div>
 <div class="grain"></div>
 
 <div class="corner">
-  <button class="icon-btn" id="navLog" aria-label="기록">🌿</button>
-  <button class="icon-btn" id="navSettings" aria-label="설정">⋯</button>
+  <button class="icon-btn" id="navHome" aria-label="처음으로"><svg class="ic"><use href="#i-home"/></svg></button>
+  <button class="icon-btn" id="navLog" aria-label="기록"><svg class="ic"><use href="#i-sprout"/></svg></button>
+  <button class="icon-btn" id="navSettings" aria-label="설정"><svg class="ic"><use href="#i-tune"/></svg></button>
 </div>
 
 <div id="app">
@@ -276,17 +348,17 @@ body{
   <section class="screen" data-screen="home">
     <div class="wrap">
       <div class="wordmark">
-        <div class="wm-line"><span class="wm-num">60</span>초 리셋</div>
-        <div class="wm-tag">이거면 충분해</div>
+        <div class="wm-line"><span class="wm-num">60</span><span class="wm-rest">초 리셋</span></div>
+        <div class="wm-tag" style="color: rgb(110, 110, 110)">이거면 충분해</div>
       </div>
       <div class="fade-line" id="homeGreeting"></div>
       <div class="modes">
-        <button class="btn mode" data-go="word"><span class="emoji">🙏</span><span><span class="t">말씀</span><span class="sub">한 구절 읽기</span></span></button>
-        <button class="btn mode" data-go="prayer"><span class="emoji">🕯️</span><span><span class="t">기도</span><span class="sub">눈 감고 천천히 주기도문</span></span></button>
-        <button class="btn mode" data-go="cpick"><span class="emoji">🕊️</span><span><span class="t">고요</span><span class="sub">거룩한 이름 하나에 머물기</span></span></button>
-        <button class="btn mode" data-go="breath"><span class="emoji">🌬️</span><span><span class="t">호흡</span><span class="sub">같이 숨 쉬기</span></span></button>
+        <button class="btn mode" data-go="word"><span class="badge"><svg class="ic"><use href="#i-book"/></svg></span><span class="mt"><span class="t">말씀</span><span class="sub">한 구절 읽기</span></span></button>
+        <button class="btn mode" data-go="prayer"><span class="badge"><svg class="ic"><use href="#i-candle"/></svg></span><span class="mt"><span class="t">기도</span><span class="sub">눈 감고 천천히 주기도문</span></span></button>
+        <button class="btn mode" data-go="cpick"><span class="badge"><svg class="ic"><use href="#i-lotus"/></svg></span><span class="mt"><span class="t">고요</span><span class="sub">거룩한 이름 하나에 머물기</span></span></button>
+        <button class="btn mode" data-go="breath"><span class="badge"><svg class="ic"><use href="#i-wind"/></svg></span><span class="mt"><span class="t">호흡</span><span class="sub">같이 숨 쉬기</span></span></button>
       </div>
-      <button class="softlink" data-go="lol">🎮 롤 켜기 전이야?</button>
+      <button class="softlink" data-go="lol"><svg class="ic"><use href="#i-game"/></svg>롤·유튜브 켜기 전이야?</button>
     </div>
   </section>
 
@@ -295,10 +367,11 @@ body{
     <div class="wrap">
       <div class="orb-stage">
         <div class="orb-halo"></div>
-        <div class="orb"></div>
-        <div class="orb-word" id="breathWord">들이쉬고…</div>
+        <img class="orb-img" src="assets/orb.png" alt="" />
+        <canvas class="spark" id="sparkBreath"></canvas>
+        <div class="orb-word" id="breathWord" style="color: rgb(112, 112, 112)">들이쉬고…</div>
       </div>
-      <button class="btn btn-soft" data-enough="breath">이거면 충분해</button>
+      <button class="btn btn-soft" data-enough="breath"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
     </div>
   </section>
 
@@ -310,8 +383,8 @@ body{
         <div class="verse-text" id="verseText"></div>
         <div class="verse-pray" id="versePray"></div>
       </div>
-      <button class="btn btn-soft" data-enough="word">이거면 충분해</button>
-      <button class="softlink" id="verseAnother">다른 구절 보기</button>
+      <button class="btn btn-soft" data-enough="word"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
+      <button class="softlink" id="verseAnother"><svg class="ic"><use href="#i-refresh"/></svg>마음 안 끌리면, 다른 구절</button>
     </div>
   </section>
 
@@ -320,48 +393,50 @@ body{
     <div class="wrap">
       <div class="prayer-stage">
         <div class="prayer-glow"></div>
+        <canvas class="spark" id="sparkPrayer"></canvas>
         <div class="prayer-line" id="prayerLine"></div>
       </div>
       <div class="fade-line" id="prayerHint">눈 감고 외워도, 천천히 읽어도 좋아.</div>
-      <button class="btn btn-soft" data-enough="prayer">이거면 충분해</button>
+      <button class="btn btn-soft" data-enough="prayer"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
     </div>
   </section>
 
-  <!-- CENTER: 단어 고르기 -->
+  <!-- CENTER pick -->
   <section class="screen" data-screen="cpick">
     <div class="wrap">
-      <div class="title">오늘 머물 한 단어,<br>하나만 골라.</div>
+      <div class="title">오늘 머물 <span class="em">한 단어</span>,<br>하나만 골라.</div>
       <div class="chips" id="centerChips"></div>
-      <button class="softlink" id="centerReshuffle">🕊️ 다른 단어 보여줘</button>
+      <button class="softlink" id="centerReshuffle"><svg class="ic"><use href="#i-refresh"/></svg>마음 안 끌리면, 다른 단어</button>
     </div>
   </section>
 
-  <!-- CENTER: 머물기 -->
+  <!-- CENTER dwell -->
   <section class="screen" data-screen="center">
     <div class="wrap">
       <div class="prayer-stage">
         <div class="prayer-glow"></div>
+        <canvas class="spark" id="sparkCenter"></canvas>
         <div class="center-word" id="centerWord"></div>
       </div>
       <div class="center-gloss" id="centerGloss"></div>
       <div class="fade-line">딴 생각이 나면, 이 단어로 살며시 돌아와.</div>
-      <button class="btn btn-soft" data-enough="center">이거면 충분해</button>
+      <button class="btn btn-soft" data-enough="center"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
     </div>
   </section>
 
   <!-- ENOUGH -->
   <section class="screen" data-screen="enough">
     <div class="wrap">
-      <div class="title">이거면 충분해.</div>
+      <div class="title"><span class="em">이거면 충분해.</span></div>
     </div>
   </section>
 
   <!-- ONE_THING -->
   <section class="screen" data-screen="one">
     <div class="wrap">
-      <div class="title" id="oneTitle">지금 가볍게 시동 걸 거,<br>딱 하나만.</div>
+      <div class="title" id="oneTitle">지금 가볍게 시동 걸 거,<br><span class="em">딱 하나만.</span></div>
       <div class="chips" id="oneChips"></div>
-      <button class="softlink" id="oneReshuffle">🎲 다른 거 보여줘</button>
+      <button class="softlink" id="oneReshuffle"><svg class="ic"><use href="#i-refresh"/></svg>마음 안 끌리면, 다른 거</button>
       <input class="input" id="oneInput" placeholder="직접 적어도 돼 (선택)" />
       <button class="btn-ghost" data-go="done">오늘은 여기까지 — 그것도 좋아</button>
     </div>
@@ -371,38 +446,44 @@ body{
   <section class="screen" data-screen="timer">
     <div class="wrap">
       <div class="ring-stage">
+        <div class="ring-core"></div>
         <svg viewBox="0 0 240 240">
-          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#b9b0e6"/><stop offset=".55" stop-color="#c6cdec"/><stop offset="1" stop-color="#dcb8d4"/>
+          <defs><linearGradient id="ringgrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#cfc2f0"/><stop offset=".5" stop-color="#c6cdec"/><stop offset="1" stop-color="#ecccdf"/>
+          </linearGradient>
+          <linearGradient id="cometgrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fbf5ff"/><stop offset="1" stop-color="#cdb8f5"/>
           </linearGradient></defs>
           <circle class="ring-bg" cx="120" cy="120" r="110"/>
           <circle class="ring-fg" id="ringFg" cx="120" cy="120" r="110"/>
+          <circle class="ring-comet" cx="120" cy="120" r="110"/>
         </svg>
+        <canvas class="spark" id="sparkTimer"></canvas>
         <div class="ring-inner">
           <div class="ring-time" id="ringTime">3:00</div>
           <div class="ring-thing" id="ringThing"></div>
         </div>
       </div>
       <div class="fade-line">3분. 이거 하나면 돼.</div>
-      <button class="btn btn-soft" id="timerStop">이거면 충분해</button>
+      <button class="btn btn-soft" id="timerStop"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
     </div>
   </section>
 
-  <!-- LOL_FORK -->
+  <!-- LOL -->
   <section class="screen" data-screen="lol">
     <div class="wrap">
-      <div class="title">이제 롤 켜도 돼 👍</div>
+      <div class="title">이제 가서 즐겨도 돼.</div>
       <div class="lead">근데 3분만, 딱 하나 먼저 해볼래?</div>
-      <button class="btn btn-primary" id="lolFirst">3분 먼저 해볼래</button>
-      <button class="btn btn-ghost" id="lolGo">롤 ㄱㄱ</button>
+      <button class="btn btn-primary" id="lolFirst"><svg class="ic"><use href="#i-clock"/></svg> 3분 먼저 해볼래</button>
+      <button class="btn btn-ghost" id="lolGo">그냥 갈래</button>
     </div>
   </section>
 
   <!-- DONE -->
   <section class="screen" data-screen="done">
     <div class="wrap">
-      <div class="title" id="doneText">해냈다. 진짜로.</div>
-      <div class="lead" id="doneSub">닫아도 성공이야.</div>
+      <div class="title" id="doneText"><span class="em">해냈다. 진짜로.</span></div>
+      <div class="lead" id="doneSub" style="color: rgb(245, 245, 245)">닫아도 성공이야.</div>
       <button class="softlink" data-go="home">처음으로</button>
     </div>
   </section>
@@ -414,7 +495,7 @@ body{
         <div class="stat-label">이번 주에 멈춰서 숨 쉰 횟수</div>
         <div class="stat-num" id="weekCount">0</div>
       </div>
-      <div class="stat-label" style="align-self:flex-start;margin-left:4px;">오늘 건드린 것</div>
+      <div class="log-head">오늘 건드린 것</div>
       <div class="log-list" id="logList"></div>
       <button class="softlink" data-go="home">처음으로</button>
     </div>
@@ -427,25 +508,18 @@ body{
   <div class="sheet">
     <button class="close-x" data-close>닫기</button>
     <h2>설정</h2>
-
     <div class="row">
-      <div>
-        <div class="label">하루 넛지</div>
-        <div class="desc">조용한 권유 한 번. 채근 아님.</div>
-      </div>
+      <div><div class="label">하루 넛지</div><div class="desc">조용한 권유 한 번. 채근 아님.</div></div>
       <button class="toggle" id="tgNudge"></button>
     </div>
     <div class="row" id="nudgeFreqRow">
       <div><div class="label">하루 몇 번</div><div class="desc">언제든 줄일 수 있어.</div></div>
-      <div class="seg" id="nudgeFreq">
-        <button data-n="1">1번</button><button data-n="2">2번</button><button data-n="3">3번</button>
-      </div>
+      <div class="seg" id="nudgeFreq"><button data-n="1">1번</button><button data-n="2">2번</button><button data-n="3">3번</button></div>
     </div>
     <div class="row" id="nudgeTimeRow">
       <div><div class="label">첫 시간</div><div class="desc">이때부터 고르게 나눠서.</div></div>
       <input class="time-in" type="time" id="nudgeTime" value="10:00" />
     </div>
-
     <div class="hint" id="nudgeHint"></div>
   </div>
 </div>
@@ -453,21 +527,102 @@ body{
 <script>
 "use strict";
 /* ============================================================
-   60초 리셋 — 단일 HTML, 오프라인, localStorage
-   원칙: 실패 불가능 / 죄책감 0 / 한 번에 하나 / 열 때마다 새 출발
+   60초 리셋 — Liquid Pearl Aura edition
+   실패 불가능 / 죄책감 0 / 한 번에 하나 / 열 때마다 새 출발
    ============================================================ */
-const K = {
-  settings:"reset60:settings",
-  log:"reset60:log",
-  lastOpen:"reset60:lastOpen",
-};
+const K = { settings:"reset60:settings", log:"reset60:log", lastOpen:"reset60:lastOpen" };
 const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 
 const DEFAULT_SETTINGS = { nudgeEnabled:false, nudgeCount:2, nudgeTime:"10:00" };
 let settings = Object.assign({}, DEFAULT_SETTINGS, load(K.settings, {}));
 
-/* ---------- 구절 풀 (개역개정 기본 본문 내장) ---------- */
+/* ============================================================
+   ✦ Sparkle field — 흰 반짝임 (canvas)
+   ============================================================ */
+class SparkleField{
+  constructor(canvas, opts){
+    this.c=canvas; this.ctx=canvas.getContext("2d");
+    this.o=Object.assign({count:46, ringF:0, spreadF:0, maxR:1.7, glint:0.18, rise:0.09}, opts||{});
+    this.parts=[]; this.raf=0; this.running=false; this.t0=0;
+  }
+  resize(){
+    const r=this.c.getBoundingClientRect();
+    if(!r.width){ this.w=this.h=0; return; }
+    this.dpr=Math.min(2,window.devicePixelRatio||1);
+    this.w=r.width; this.h=r.height;
+    this.c.width=Math.round(this.w*this.dpr); this.c.height=Math.round(this.h*this.dpr);
+    this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+    this.seed();
+  }
+  seed(){
+    const {count,ringF,spreadF,maxR,glint}=this.o, cx=this.w/2, cy=this.h/2;
+    const ring=this.w*ringF, spread=this.w*spreadF;
+    this.parts=[];
+    for(let i=0;i<count;i++){
+      let x,y;
+      if(ringF){ const a=Math.random()*Math.PI*2, rad=ring+(Math.random()-.5)*spread; x=cx+Math.cos(a)*rad; y=cy+Math.sin(a)*rad; }
+      else { x=Math.random()*this.w; y=Math.random()*this.h; }
+      this.parts.push({x,y,r:.5+Math.random()*maxR,a:.28+Math.random()*.72,
+        ph:Math.random()*Math.PI*2, sp:.5+Math.random()*1.5,
+        vx:(Math.random()-.5)*.14, vy:-(this.o.rise)*(.4+Math.random()),
+        star:Math.random()<glint});
+    }
+  }
+  frame(now){
+    if(!this.running) return;
+    if(!this.w){ this.resize(); if(!this.w){ this.raf=requestAnimationFrame(this.frame.bind(this)); return; } }
+    const ctx=this.ctx, time=now*0.001;
+    ctx.clearRect(0,0,this.w,this.h);
+    ctx.globalCompositeOperation="lighter";
+    for(const p of this.parts){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.y<-6) p.y=this.h+6; if(p.x<-6) p.x=this.w+6; if(p.x>this.w+6) p.x=-6;
+      const tw=.32+.68*(.5+.5*Math.sin(time*p.sp*2+p.ph));
+      const al=p.a*tw, rr=p.r*(.8+.5*tw);
+      if(p.star){
+        const R=rr*4.2; ctx.save(); ctx.translate(p.x,p.y);
+        const sg=ctx.createRadialGradient(0,0,0,0,0,R);
+        sg.addColorStop(0,"rgba(255,255,255,"+(al)+")"); sg.addColorStop(1,"rgba(255,255,255,0)");
+        ctx.fillStyle=sg; ctx.beginPath();
+        ctx.moveTo(0,-R); ctx.quadraticCurveTo(R*.13,0,0,R); ctx.quadraticCurveTo(-R*.13,0,0,-R);
+        ctx.moveTo(-R,0); ctx.quadraticCurveTo(0,R*.13,R,0); ctx.quadraticCurveTo(0,-R*.13,-R,0);
+        ctx.fill(); ctx.restore();
+      }
+      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,rr*2.6);
+      g.addColorStop(0,"rgba(255,255,255,"+al+")");
+      g.addColorStop(.4,"rgba(255,250,246,"+(al*.5)+")");
+      g.addColorStop(1,"rgba(255,255,255,0)");
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,rr*2.6,0,6.283); ctx.fill();
+    }
+    ctx.globalCompositeOperation="source-over";
+    this.raf=requestAnimationFrame(this.frame.bind(this));
+  }
+  start(){ if(reduce){ this.resize(); this.drawStatic(); return; } if(this.running) return; this.running=true; this.resize(); this.raf=requestAnimationFrame(this.frame.bind(this)); }
+  drawStatic(){ if(!this.w) return; const ctx=this.ctx; ctx.clearRect(0,0,this.w,this.h); ctx.globalCompositeOperation="lighter";
+    for(const p of this.parts){ const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.6); g.addColorStop(0,"rgba(255,255,255,"+p.a+")"); g.addColorStop(1,"rgba(255,255,255,0)"); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*2.6,0,6.283); ctx.fill(); } ctx.globalCompositeOperation="source-over"; }
+  stop(){ this.running=false; if(this.raf) cancelAnimationFrame(this.raf); this.raf=0; if(this.ctx&&this.w) this.ctx.clearRect(0,0,this.w,this.h); }
+}
+const fields = {};
+function field(name){
+  if(fields[name]) return fields[name];
+  const map={
+    breath:{id:"sparkBreath", opts:{count:42, ringF:.30, spreadF:.62, glint:.24, maxR:1.9, rise:.08}},
+    timer:{id:"sparkTimer", opts:{count:72, ringF:.43, spreadF:.2, glint:.36, maxR:2, rise:.05}},
+    center:{id:"sparkCenter", opts:{count:40, ringF:.24, spreadF:.5, glint:.26, maxR:1.8, rise:.07}},
+    prayer:{id:"sparkPrayer", opts:{count:40, ringF:.24, spreadF:.5, glint:.22, maxR:1.7, rise:.07}},
+  };
+  const m=map[name]; if(!m) return null;
+  const cv=document.getElementById(m.id); if(!cv) return null;
+  return fields[name]=new SparkleField(cv, m.opts);
+}
+let activeField=null;
+function startField(name){ stopField(); const f=field(name); if(f){ activeField=f; requestAnimationFrame(()=>f.start()); } }
+function stopField(){ if(activeField){ activeField.stop(); activeField=null; } }
+window.addEventListener("resize", ()=>{ if(activeField){ activeField.resize(); if(reduce) activeField.drawStatic(); } });
+
+/* ---------- 구절 ---------- */
 const VERSE_SEED = [
   {ref:"마태복음 11:28-30", theme:"쉼", text:"수고하고 무거운 짐 진 자들아 다 내게로 오라 내가 너희를 쉬게 하리라 나는 마음이 온유하고 겸손하니 나의 멍에를 메고 내게 배우라 그리하면 너희 마음이 쉼을 얻으리니 이는 내 멍에는 쉽고 내 짐은 가벼움이라"},
   {ref:"예레미야애가 3:22-23", theme:"새 출발", text:"여호와의 인자와 긍휼이 무궁하시므로 우리가 진멸되지 아니함이니이다 이것들이 아침마다 새로우니 주의 성실하심이 크시도소이다"},
@@ -485,9 +640,25 @@ const VERSE_SEED = [
   {ref:"시편 121:1-2", theme:"도움", text:"내가 산을 향하여 눈을 들리라 나의 도움이 어디서 올까 나의 도움은 천지를 지으신 여호와에게서로다"},
   {ref:"마태복음 6:26", theme:"돌보심", text:"공중의 새를 보라 심지도 않고 거두지도 않고 창고에 모아들이지도 아니하되 너희 하늘 아버지께서 기르시나니 너희는 이것들보다 귀하지 아니하냐"},
 ];
-function prayerFor(theme){ return "주님, 이 잠깐 동안 " + (theme||"쉼") + "을(를) 주세요."; }
+const PRAYERS = {
+  "마태복음 11:28-30":"주님, 이 무거운 마음 그대로 주께 기댑니다.",
+  "예레미야애가 3:22-23":"오늘 아침도 새 자비로, 다시 시작할게요.",
+  "로마서 8:1":"정죄 대신 받아주심을 믿고, 잠시 숨을 고릅니다.",
+  "에베소서 2:8-9":"내 힘이 아니라 주님 은혜로 충분합니다.",
+  "빌립보서 4:6-7":"염려 대신, 지금 이 순간을 주께 올려드립니다.",
+  "베드로전서 5:7":"염려를 주께 맡기고, 손을 펴봅니다.",
+  "시편 23:1-3":"주님이 나의 목자이시니, 잠시 쉬어갑니다.",
+  "시편 46:10":"잠잠히, 주님이 하나님이심을 기억합니다.",
+  "이사야 41:10":"두려워도 괜찮아요, 주님이 함께 계시니까.",
+  "마태복음 6:34":"내일은 내려놓고, 오늘 하루만 주와 함께 있을게요.",
+  "요한복음 14:27":"세상이 줄 수 없는 평안을, 지금 받습니다.",
+  "이사야 40:31":"주님을 바라며, 새 힘을 구합니다.",
+  "히브리서 4:16":"담대히 나아가, 때를 따라 돕는 은혜를 구합니다.",
+  "시편 121:1-2":"나의 도움이 주께로부터 옴을 믿습니다.",
+  "마태복음 6:26":"새 한 마리도 돌보시는 주님, 저도 맡깁니다.",
+};
+function prayerLine(v){ return PRAYERS[v.ref] || "주님, 이 잠깐을 주께 맡깁니다."; }
 
-/* ---------- 한 가지 풀 (~32, 랜덤 노출) ---------- */
 const ONE_POOL = [
   "성경 한 단락만 읽기","한 줄 기도 적기","유튜브 애니 장면 1컷만 스케치","떠오른 아이디어 1개 메모",
   "물 한 잔 마시기","책상 위 3개만 제자리에","창문 열고 환기 한 번","가볍게 스트레칭 한 번",
@@ -504,9 +675,7 @@ const ONE_POOL = [
    ============================================================ */
 const screens = {};
 document.querySelectorAll(".screen").forEach(s=>screens[s.dataset.screen]=s);
-let current = "home";
-let lolFlag = false;
-let oneThing = null;
+let current = "home", lolFlag=false, oneThing=null;
 
 function show(name){
   if(screens[current]) screens[current].classList.remove("active");
@@ -520,104 +689,69 @@ function show(name){
   if(name==="one") renderChips();
   if(name==="timer") startTimer();
   if(name==="log") renderLog();
+  if(["breath","timer","center","prayer"].includes(name)) startField(name); else stopField();
   if(name==="enough"){ setTimeout(()=>{ show(lolFlag ? "lol" : "one"); }, 1500); }
   if(name==="home") refreshGreeting();
+  // 처음으로 단축키: 홈 화면엔 숨기고 나머지 화면에서만 노출
+  const homeBtn=document.getElementById("navHome");
+  if(homeBtn) homeBtn.style.display = (name==="home") ? "none" : "flex";
 }
 
-/* ---------- 리플 이펙트 ---------- */
+/* ---------- 리플 ---------- */
 function ripple(e){
-  const b=e.currentTarget; const r=b.getBoundingClientRect();
-  const size=Math.max(r.width,r.height)*1.4;
-  const s=document.createElement("span"); s.className="ripple";
-  s.style.width=s.style.height=size+"px";
+  const b=e.currentTarget, r=b.getBoundingClientRect(), size=Math.max(r.width,r.height)*1.4;
+  const s=document.createElement("span"); s.className="ripple"; s.style.width=s.style.height=size+"px";
   s.style.left=((e.touches?e.touches[0].clientX:e.clientX)-r.left)+"px";
   s.style.top=((e.touches?e.touches[0].clientY:e.clientY)-r.top)+"px";
-  b.appendChild(s); setTimeout(()=>s.remove(),700);
+  b.appendChild(s); setTimeout(()=>s.remove(),750);
   if(navigator.vibrate) try{navigator.vibrate(8);}catch(_){}
 }
 document.querySelectorAll(".btn,.chip").forEach(b=>b.addEventListener("pointerdown",ripple));
 
-/* ============================================================
-   호흡
-   ============================================================ */
+/* ============================================================ 호흡 */
 let breathTimer=null;
 function startBreath(){
-  const w=document.getElementById("breathWord");
+  const w=document.getElementById("breathWord"); stopBreath();
+  [document.querySelector(".orb-img"),document.querySelector(".orb-halo")].forEach(el=>{ if(el){ el.style.animation="none"; void el.offsetWidth; el.style.animation=""; } });
   let inhale=true; w.textContent="들이쉬고…";
-  stopBreath();
-  // 10s 사이클(들숨 4s/멈춤 1s/날숨 5s 근사) — 문구만 부드럽게 교차
   const cycle=()=>{ inhale=!inhale; w.style.opacity=0;
-    setTimeout(()=>{ w.textContent=inhale?"들이쉬고…":"내쉬고…"; w.style.opacity=1; },400); };
-  w.style.transition="opacity .4s ease";
-  breathTimer=setInterval(cycle,5000);
+    setTimeout(()=>{ w.textContent=inhale?"들이쉬고…":"내쉬고…"; w.style.opacity=1; },450); };
+  w.style.transition="opacity .4s ease"; w.style.opacity=1; breathTimer=setInterval(cycle,4000);
 }
 function stopBreath(){ if(breathTimer){clearInterval(breathTimer);breathTimer=null;} }
 
-/* ============================================================
-   기도 (주기도문 페이싱) — 눈 감고 외워도, 읽어도 성공
-   ============================================================ */
+/* ============================================================ 기도 */
 const PRAYER_LINES = [
-  "하늘에 계신 우리 아버지여",
-  "이름이 거룩히 여김을 받으시오며",
-  "나라가 임하시오며",
-  "뜻이 하늘에서 이루어진 것 같이",
-  "땅에서도 이루어지이다",
-  "오늘날 우리에게\n일용할 양식을 주시옵고",
-  "우리가 우리에게 죄 지은 자를\n사하여 준 것 같이",
-  "우리 죄를 사하여 주시옵고",
-  "우리를 시험에 들게 하지 마시옵고",
-  "다만 악에서 구하시옵소서",
-  "나라와 권세와 영광이\n아버지께 영원히 있사옵나이다",
-  "아멘.",
+  "하늘에 계신 우리 아버지여","이름이 거룩히 여김을 받으시오며","나라가 임하시오며",
+  "뜻이 하늘에서 이루어진 것 같이","땅에서도 이루어지이다","오늘날 우리에게\n일용할 양식을 주시옵고",
+  "우리가 우리에게 죄 지은 자를\n사하여 준 것 같이","우리 죄를 사하여 주시옵고",
+  "우리를 시험에 들게 하지 마시옵고","다만 악에서 구하시옵소서",
+  "나라와 권세와 영광이\n아버지께 영원히 있사옵나이다","아멘.",
 ];
 let prayerTimer=null;
 function startPrayer(){
   stopPrayer();
-  const el=document.getElementById("prayerLine");
-  const hint=document.getElementById("prayerHint");
-  hint.textContent="눈 감고 외워도, 천천히 읽어도 좋아.";
-  let i=0;
-  const render=()=>{ el.style.opacity=0;
-    setTimeout(()=>{ el.innerHTML=PRAYER_LINES[i].replace(/\n/g,"<br>"); el.style.opacity=1; },450); };
+  const el=document.getElementById("prayerLine"), hint=document.getElementById("prayerHint");
+  hint.textContent="눈 감고 외워도, 천천히 읽어도 좋아."; let i=0;
+  const render=()=>{ el.style.opacity=0; setTimeout(()=>{ el.innerHTML=PRAYER_LINES[i].replace(/\n/g,"<br>"); el.style.opacity=1; },450); };
   render();
-  prayerTimer=setInterval(()=>{
-    i++;
-    if(i>=PRAYER_LINES.length){ // 끝까지 가면 아멘에 머물고 멈춤
-      clearInterval(prayerTimer); prayerTimer=null;
-      hint.textContent="이거면 충분해 — 천천히.";
-      return;
-    }
+  prayerTimer=setInterval(()=>{ i++;
+    if(i>=PRAYER_LINES.length){ clearInterval(prayerTimer); prayerTimer=null; hint.textContent="이거면 충분해 — 천천히."; return; }
     render();
-  },5200); // ~12줄 × 5.2s ≈ 62s
+  },5200);
 }
 function stopPrayer(){ if(prayerTimer){clearInterval(prayerTimer);prayerTimer=null;} }
 
-/* ============================================================
-   고요 기도 (센터링) — 거룩한 이름 하나에 머물기
-   ============================================================ */
+/* ============================================================ 고요 */
 const CENTER_WORDS = [
-  {w:"예수",     g:"나의 구원자"},
-  {w:"여호와",   g:"스스로 계신 분"},
-  {w:"호산나",   g:"이제 구원하소서"},
-  {w:"임마누엘", g:"하나님이 우리와 함께"},
-  {w:"아바",     g:"아버지"},
-  {w:"할렐루야", g:"주를 찬양하라"},
-  {w:"마라나타", g:"오소서, 주 예수여"},
-  {w:"엘 샤다이", g:"전능하신 하나님"},
-  {w:"아도나이", g:"나의 주(主)"},
-  {w:"거룩",     g:"거룩하신 주"},
-  {w:"샬롬",     g:"주께서 주시는 평강"},
-  {w:"보혜사",   g:"늘 함께하시는 성령"},
-  {w:"어린양",   g:"죄를 지신 주"},
-  {w:"반석",     g:"나의 피할 바위"},
-  {w:"영광",     g:"주께 영광"},
+  {w:"예수",g:"나의 구원자"},{w:"여호와",g:"스스로 계신 분"},{w:"호산나",g:"이제 구원하소서"},
+  {w:"임마누엘",g:"하나님이 우리와 함께"},{w:"아바",g:"아버지"},{w:"할렐루야",g:"주를 찬양하라"},
+  {w:"마라나타",g:"오소서, 주 예수여"},{w:"엘 샤다이",g:"전능하신 하나님"},{w:"아도나이",g:"나의 주(主)"},
+  {w:"거룩",g:"거룩하신 주"},{w:"샬롬",g:"주께서 주시는 평강"},{w:"보혜사",g:"늘 함께하시는 성령"},
+  {w:"어린양",g:"죄를 지신 주"},{w:"반석",g:"나의 피할 바위"},{w:"영광",g:"주께 영광"},
 ];
 let centerChoice=null;
-function pickCenter3(){
-  const a=CENTER_WORDS.slice(), out=[];
-  for(let i=0;i<3 && a.length;i++) out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);
-  return out;
-}
+function pickCenter3(){ const a=CENTER_WORDS.slice(), out=[]; for(let i=0;i<3&&a.length;i++) out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); return out; }
 function renderCenterChips(){
   const box=document.getElementById("centerChips"); box.innerHTML="";
   pickCenter3().forEach(item=>{
@@ -635,26 +769,18 @@ function startCenter(){
 }
 document.getElementById("centerReshuffle").addEventListener("click",renderCenterChips);
 
-/* ============================================================
-   말씀
-   ============================================================ */
+/* ============================================================ 말씀 */
 let curVerse=null;
 function loadVerse(){
   curVerse = VERSE_SEED[Math.floor(Math.random()*VERSE_SEED.length)];
   document.getElementById("verseRef").textContent=curVerse.ref;
   document.getElementById("verseText").textContent=curVerse.text;
-  document.getElementById("versePray").textContent=prayerFor(curVerse.theme);
+  document.getElementById("versePray").textContent=prayerLine(curVerse);
 }
 document.getElementById("verseAnother").addEventListener("click",loadVerse);
 
-/* ============================================================
-   한 가지 (랜덤 칩)
-   ============================================================ */
-function pick3(){
-  const a=ONE_POOL.slice(); const out=[];
-  for(let i=0;i<3 && a.length;i++){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); }
-  return out;
-}
+/* ============================================================ 한 가지 */
+function pick3(){ const a=ONE_POOL.slice(), out=[]; for(let i=0;i<3&&a.length;i++) out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); return out; }
 function renderChips(){
   const box=document.getElementById("oneChips"); box.innerHTML="";
   pick3().forEach(t=>{
@@ -669,21 +795,16 @@ document.getElementById("oneInput").addEventListener("keydown",e=>{
   if(e.key==="Enter" && e.target.value.trim()){ oneThing=e.target.value.trim(); show("timer"); }
 });
 
-/* ============================================================
-   3분 타이머
-   ============================================================ */
-const TOTAL=180;
-let timerId=null, remain=TOTAL;
-const R=110, CIRC=2*Math.PI*R;
-const ringFg=document.getElementById("ringFg");
+/* ============================================================ 3분 타이머 */
+const TOTAL=180; let timerId=null, remain=TOTAL;
+const R=110, CIRC=2*Math.PI*R, ringFg=document.getElementById("ringFg");
 ringFg.style.strokeDasharray=CIRC;
-function fmt(s){ const m=Math.floor(s/60); const ss=s%60; return m+":"+String(ss).padStart(2,"0"); }
+function fmt(s){ const m=Math.floor(s/60), ss=s%60; return m+":"+String(ss).padStart(2,"0"); }
 function startTimer(){
   remain=TOTAL;
   document.getElementById("ringThing").textContent=oneThing||"";
   document.getElementById("ringTime").textContent=fmt(remain);
-  ringFg.style.strokeDashoffset=0;
-  clearInterval(timerId);
+  ringFg.style.strokeDashoffset=0; clearInterval(timerId);
   timerId=setInterval(()=>{
     remain--;
     document.getElementById("ringTime").textContent=fmt(Math.max(remain,0));
@@ -694,63 +815,47 @@ function startTimer(){
 function finishTimer(complete){
   clearInterval(timerId);
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
-  if(complete){ d.textContent="해냈다. 진짜로."; s.textContent="닫아도 성공이야."; }
-  else { d.textContent="이거면 충분해."; s.textContent="시작한 것만으로 충분해."; }
+  if(complete){ d.innerHTML="<span class='em'>해냈다. 진짜로.</span>"; s.textContent="닫아도 성공이야."; }
+  else { d.innerHTML="<span class='em'>이거면 충분해.</span>"; s.textContent="시작한 것만으로 충분해."; }
   show("done");
 }
 document.getElementById("timerStop").addEventListener("click",()=>{
-  clearInterval(timerId);
-  if(TOTAL-remain>0) logAdd("fivemin",oneThing); // 시작했으면 +1
-  finishTimer(false);
+  clearInterval(timerId); if(TOTAL-remain>0) logAdd("fivemin",oneThing); finishTimer(false);
 });
 
-/* ============================================================
-   로그 (긍정 전용, append-only)
-   ============================================================ */
-function logAdd(type,thing){
-  const log=load(K.log,[]);
-  log.push({ts:new Date().toISOString(),type,thing:thing||undefined});
-  save(K.log,log);
-}
+/* ============================================================ 로그 */
+function logAdd(type,thing){ const log=load(K.log,[]); log.push({ts:new Date().toISOString(),type,thing:thing||undefined}); save(K.log,log); }
+const LOG_ICON={breath:"i-wind",word:"i-book",prayer:"i-candle",center:"i-lotus",fivemin:"i-clock"};
+const LOG_LABEL={breath:"호흡",word:"말씀",prayer:"기도",center:"고요",fivemin:"3분"};
 function renderLog(){
   const log=load(K.log,[]);
-  // 이번 주(월~) 호흡/말씀 멈춤 횟수
-  const now=new Date(); const day=(now.getDay()+6)%7;
+  const now=new Date(), day=(now.getDay()+6)%7;
   const weekStart=new Date(now); weekStart.setHours(0,0,0,0); weekStart.setDate(now.getDate()-day);
-  const week=log.filter(e=>new Date(e.ts)>=weekStart && (e.type==="breath"||e.type==="word"||e.type==="prayer"||e.type==="center")).length;
+  const week=log.filter(e=>new Date(e.ts)>=weekStart && ["breath","word","prayer","center"].includes(e.type)).length;
   document.getElementById("weekCount").textContent=week;
-  // 오늘 건드린 것
   const today=new Date(); today.setHours(0,0,0,0);
   const items=log.filter(e=>new Date(e.ts)>=today).slice().reverse();
   const list=document.getElementById("logList"); list.innerHTML="";
   if(!items.length){ const e=document.createElement("div"); e.className="log-item";
     e.innerHTML="<span style='color:var(--ink-faint)'>아직 비어 있어 — 그것도 괜찮아.</span>"; list.appendChild(e); }
-  const names={breath:"🌬️ 호흡",word:"🙏 말씀",prayer:"🕯️ 기도",center:"🕊️ 고요",fivemin:"⏳ 3분"};
   items.forEach(e=>{
     const row=document.createElement("div"); row.className="log-item";
-    const t=new Date(e.ts); const hm=String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");
-    row.innerHTML="<span>"+(e.thing?e.thing:names[e.type]||"기록")+"</span><span class='when'>"+hm+"</span>";
+    const t=new Date(e.ts), hm=String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");
+    const ic=LOG_ICON[e.type]||"i-check";
+    const label= e.thing ? e.thing : (LOG_LABEL[e.type]||"기록");
+    row.innerHTML="<span class='lh'><svg class='ic'><use href='#"+ic+"'/></svg>"+label+"</span><span class='when'>"+hm+"</span>";
     list.appendChild(row);
   });
 }
 
-/* ============================================================
-   복귀 인사 (gap은 인사 1회에만, 숫자 미표시)
-   ============================================================ */
+/* ============================================================ 인사 */
+const GREETINGS=["왔구나, 반가워.","딱 1분이면 돼.","여기서 잠깐 쉬자.","지금 이 순간이면 충분해.","천천히 와도 돼.","잘 왔어. 오늘이 처음인 것처럼.","숨 한 번 고르고 가자.","안 해도 괜찮아. 그냥 들렀어도 돼."];
 function refreshGreeting(){
   const g=document.getElementById("homeGreeting");
-  const last=load(K.lastOpen,null);
-  let msg="";
-  if(last){
-    const days=(Date.now()-new Date(last).getTime())/86400000;
-    if(days>=2) msg="잘 왔어. 오늘이 처음인 것처럼.";
-  }
-  g.textContent=msg;
+  g.textContent=GREETINGS[Math.floor(Math.random()*GREETINGS.length)];
 }
 
-/* ============================================================
-   라우팅 (버튼)
-   ============================================================ */
+/* ============================================================ 라우팅 */
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{
   const t=b.dataset.go;
   if(t==="lol"){ lolEnter(); return; }
@@ -761,37 +866,31 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
   if(t==="done"){ finishDone(); return; }
   show(t);
 }));
-function lolEnter(){ lolFlag=true; show("breath"); } // 롤 진입도 같은 리셋으로 수렴(호흡)
-document.querySelectorAll("[data-enough]").forEach(b=>b.addEventListener("click",e=>{
-  const type=b.dataset.enough; logAdd(type); show("enough");
-}));
+function lolEnter(){ lolFlag=true; show("breath"); }
+document.querySelectorAll("[data-enough]").forEach(b=>b.addEventListener("click",()=>{ logAdd(b.dataset.enough); show("enough"); }));
 function finishDone(){
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
-  d.textContent="그것도 좋아."; s.textContent="닫아도 성공이야.";
-  show("done");
+  d.innerHTML="<span class='em'>그것도 좋아.</span>"; s.textContent="닫아도 성공이야."; show("done");
 }
-
-/* 롤 분기 */
 document.getElementById("lolFirst").addEventListener("click",()=>{ show("one"); });
 document.getElementById("lolGo").addEventListener("click",()=>{
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
-  d.textContent="재밌게 해 🙂"; s.textContent="죄책감 금지.";
-  show("done");
+  d.innerHTML="<span class='em'>재밌게 해.</span>"; s.textContent="죄책감 금지."; show("done");
 });
-
-/* 코너 내비 */
 document.getElementById("navLog").addEventListener("click",()=>show("log"));
 document.getElementById("navSettings").addEventListener("click",openSettings);
+document.getElementById("navHome").addEventListener("click",()=>{
+  // 진행 중이던 타이머·호흡·기도 등 정리하고 깔끔히 홈으로
+  clearInterval(timerId); stopBreath(); stopPrayer();
+  lolFlag=false;
+  show("home");
+});
 
-/* ============================================================
-   설정 모달
-   ============================================================ */
+/* ============================================================ 설정 */
 const sModal=document.getElementById("settingsModal");
 function openSettings(){ syncSettingsUI(); sModal.classList.add("open"); }
 sModal.addEventListener("click",e=>{ if(e.target===sModal||e.target.hasAttribute("data-close")) sModal.classList.remove("open"); });
-const tgNudge=document.getElementById("tgNudge");
-const freqSeg=document.getElementById("nudgeFreq");
-const nudgeTime=document.getElementById("nudgeTime");
+const tgNudge=document.getElementById("tgNudge"), freqSeg=document.getElementById("nudgeFreq"), nudgeTime=document.getElementById("nudgeTime");
 function syncSettingsUI(){
   tgNudge.classList.toggle("on",!!settings.nudgeEnabled);
   [...freqSeg.children].forEach(b=>b.classList.toggle("sel",+b.dataset.n===settings.nudgeCount));
@@ -799,7 +898,7 @@ function syncSettingsUI(){
   document.getElementById("nudgeFreqRow").style.opacity=settings.nudgeEnabled?1:.45;
   document.getElementById("nudgeTimeRow").style.opacity=settings.nudgeEnabled?1:.45;
   document.getElementById("nudgeHint").textContent= settings.nudgeEnabled
-    ? "💡 폰 홈 화면에 추가해두면 더 잘 와. 브라우저가 닫혀 있을 땐 알림이 안 올 수도 있어 — 그래도 괜찮아."
+    ? "폰 홈 화면에 추가해두면 더 잘 와. 브라우저가 닫혀 있을 땐 알림이 안 올 수도 있어 — 그래도 괜찮아."
     : "넛지는 꺼져 있어. 필요할 때만 켜.";
 }
 tgNudge.addEventListener("click",()=>{
@@ -810,37 +909,73 @@ tgNudge.addEventListener("click",()=>{
 freqSeg.addEventListener("click",e=>{ if(e.target.dataset.n){ settings.nudgeCount=+e.target.dataset.n; save(K.settings,settings); syncSettingsUI(); scheduleNudges(); }});
 nudgeTime.addEventListener("change",()=>{ settings.nudgeTime=nudgeTime.value; save(K.settings,settings); scheduleNudges(); });
 
-/* ---------- 넛지 스케줄 (앱 열려 있을 때 best-effort) ---------- */
 let nudgeTimers=[];
-const NUDGE_MSGS=["60초만 멈춰 볼까? 🌬️","숨 한 번 쉬고 가자.","말씀 한 구절 어때? 🙏","이거면 충분해 — 잠깐 들러."];
+const NUDGE_MSGS=["60초만 멈춰 볼까?","숨 한 번 쉬고 가자.","말씀 한 구절 어때?","이거면 충분해 — 잠깐 들러."];
 function clearNudges(){ nudgeTimers.forEach(t=>clearTimeout(t)); nudgeTimers=[]; }
 function scheduleNudges(){
   clearNudges();
   if(!settings.nudgeEnabled) return;
   if(!("Notification" in window) || Notification.permission!=="granted") return;
-  const [h,m]=(settings.nudgeTime||"10:00").split(":").map(Number);
-  const spanH=12; // 첫 시간부터 12시간에 걸쳐 고르게
-  const now=new Date();
+  const [h,m]=(settings.nudgeTime||"10:00").split(":").map(Number), spanH=12, now=new Date();
   for(let i=0;i<settings.nudgeCount;i++){
     const t=new Date(); t.setHours(h,m,0,0);
     t.setMinutes(t.getMinutes()+Math.round((spanH*60/Math.max(settings.nudgeCount,1))*i));
-    let delay=t.getTime()-now.getTime();
-    if(delay<0) delay+=86400000; // 지났으면 내일
-    if(delay< 25*3600*1000){
-      nudgeTimers.push(setTimeout(()=>{
-        try{ new Notification("60초 리셋", {body:NUDGE_MSGS[i%NUDGE_MSGS.length]}); }catch(_){}
-      },delay));
-    }
+    let delay=t.getTime()-now.getTime(); if(delay<0) delay+=86400000;
+    if(delay<25*3600*1000){ nudgeTimers.push(setTimeout(()=>{ try{ new Notification("60초 리셋",{body:NUDGE_MSGS[i%NUDGE_MSGS.length]}); }catch(_){} },delay)); }
   }
 }
 
-/* ============================================================
-   부팅
-   ============================================================ */
+/* ============================================================ 부팅 */
 refreshGreeting();
 show("home");
 save(K.lastOpen,new Date().toISOString());
 scheduleNudges();
+
+/* 배경 영상: 한 영상을 끕김없이 재생하다가 끝→처음 이음새에서만 0.5초 크로스페이드.
+   재생 불가 환경(미리보기)에선 둘 다 투명 유지 → 애니메이션 이미지 폴백 */
+(function initBgVideo(){
+  const A=document.getElementById("bgVidA"), B=document.getElementById("bgVidB");
+  if(!A||!B) return;
+  A.muted=B.muted=true; A.loop=B.loop=false;
+  const F=0.5;            // 이음새 크로스페이드 길이(초)
+  let D=0, ready=false, handing=false;
+  let primary=A, secondary=B;
+  function begin(){
+    if(ready) return;
+    D=A.duration; if(!isFinite(D)||D<1) D=10;
+    ready=true;
+    try{ A.currentTime=0; B.currentTime=0; }catch(e){}
+    A.style.opacity="1"; B.style.opacity="0";
+    A.play().catch(()=>{});
+    requestAnimationFrame(tick);
+  }
+  function tick(){
+    if(ready){
+      const t=primary.currentTime;
+      if(!handing && t>=D-F){            // 이음새 진입 → 다른 레이어를 처음부터 시작
+        handing=true;
+        try{ secondary.currentTime=0; }catch(e){}
+        secondary.play().catch(()=>{});
+      }
+      if(handing){
+        const k=Math.max(0,Math.min(1,(t-(D-F))/F));
+        primary.style.opacity=(1-k).toFixed(3);
+        secondary.style.opacity=k.toFixed(3);
+        if(t>=D-0.04 || primary.ended){   // 교대
+          primary.style.opacity="0"; secondary.style.opacity="1";
+          try{ primary.pause(); primary.currentTime=0; }catch(e){}
+          const tmp=primary; primary=secondary; secondary=tmp;
+          handing=false;
+        }
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  A.addEventListener("loadedmetadata", begin);
+  const tryPlay=()=>{ if(ready) primary.play().catch(()=>{}); else { A.play().catch(()=>{}); } };
+  tryPlay();
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) tryPlay(); });
+})();
 
 /* PWA: 설치 + 오프라인 (http(s)로 서빙될 때만 등록) */
 if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
