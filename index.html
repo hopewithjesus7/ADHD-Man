@@ -160,6 +160,7 @@ body{
 .mode:nth-child(2)::after{animation-delay:calc(var(--shine)*0.2);}
 .mode:nth-child(3)::after{animation-delay:calc(var(--shine)*0.4);}
 .mode:nth-child(4)::after{animation-delay:calc(var(--shine)*0.6);}
+.mode:nth-child(5)::after{animation-delay:calc(var(--shine)*0.8);}
 .mode>*{position:relative;z-index:2;}
 @keyframes sheen{0%{left:-72%;opacity:0;}6%{opacity:.8;}24%{left:130%;opacity:0;}100%{left:130%;opacity:0;}}
 
@@ -247,7 +248,7 @@ body{
 /* 빛남: 사이클 맨 앞(0~32%)에서 같은 속도로 한 번 쓸고 지나간 뒤 나머지는 쉼 → 박스 sheen과 싱크 + 위→아래 순서 유지 */
 @keyframes shimmerText{0%{background-position:90% 0;}32%{background-position:10% 0;}100%{background-position:10% 0;}}
 .mt .t,.wm-num,.wm-rest,.ring-time,
-[data-screen="one"] .title,[data-screen="cpick"] .title,[data-screen="lol"] .title,#centerChips .cw,#oneChips .ow{
+[data-screen="one"] .title,[data-screen="cpick"] .title,[data-screen="lol"] .title,[data-screen="gratitude"] .title,#centerChips .cw,#oneChips .ow{
   background:linear-gradient(100deg,#5f5896 0%,#5f5896 38%,#ffffff 50%,#c6bbf0 60%,#5f5896 72%,#5f5896 100%);
   background-size:260% 100%;-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;color:transparent;
@@ -258,7 +259,8 @@ body{
 .mode:nth-child(2) .t{animation-delay:calc(var(--shine)*0.2 + var(--shine-sync));}
 .mode:nth-child(3) .t{animation-delay:calc(var(--shine)*0.4 + var(--shine-sync));}
 .mode:nth-child(4) .t{animation-delay:calc(var(--shine)*0.6 + var(--shine-sync));}
-.wm-num,.wm-rest{animation-delay:calc(var(--shine)*0.8 + var(--shine-sync));text-shadow:0 0 14px rgba(255,255,255,.5);}
+.mode:nth-child(5) .t{animation-delay:calc(var(--shine)*0.8 + var(--shine-sync));}
+.wm-num,.wm-rest{animation-delay:calc(var(--shine)*0.92 + var(--shine-sync));text-shadow:0 0 14px rgba(255,255,255,.5);}
 /* Pass5 — 고요(cpick) 칩도 랜딩처럼: iris 테두리 + sheen + 단어 shimmer (3개 웨이브) */
 #centerChips .chip::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;opacity:.8;pointer-events:none;z-index:0;
   background:var(--g-iris) center/cover no-repeat;
@@ -421,8 +423,7 @@ body{
 
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001ms!important;}
-  .orb-img,.orb-halo,.center-word,.prayer-glow,.ring-core,.bg-img{animation:none!important;transform:none!important;}
-  .orb-img,.orb-halo{transform:scale(1)!important;}
+  .center-word,.prayer-glow,.ring-core,.bg-img{animation:none!important;transform:none!important;}
 }
 @media (max-height:680px){
   .orb-stage{width:260px;height:260px;}.orb-img{width:170px;height:170px;}.orb-halo{width:240px;height:240px;}
@@ -446,6 +447,7 @@ body{
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 2"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.8 10.6 12 4l8.2 6.6"/><path d="M5.6 9.4V19a.8.8 0 0 0 .8.8h11.2a.8.8 0 0 0 .8-.8V9.4"/><path d="M9.8 19.8v-5.2h4.4v5.2"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.4 4.8 13.2a4.3 4.3 0 0 1 6.1-6.1l1.1 1.1 1.1-1.1a4.3 4.3 0 0 1 6.1 6.1Z"/></symbol>
 </svg>
 
 <div class="bg-img"></div>
@@ -478,8 +480,20 @@ body{
         <button class="btn mode" data-go="prayer"><span class="badge"><svg class="ic"><use href="#i-candle"/></svg></span><span class="mt"><span class="t">기도</span><span class="sub">눈 감고 천천히 주기도문</span></span></button>
         <button class="btn mode" data-go="cpick"><span class="badge"><svg class="ic"><use href="#i-lotus"/></svg></span><span class="mt"><span class="t">고요</span><span class="sub">거룩한 이름 하나에 머물기</span></span></button>
         <button class="btn mode" data-go="breath"><span class="badge"><svg class="ic"><use href="#i-wind"/></svg></span><span class="mt"><span class="t">호흡</span><span class="sub">같이 숨 쉬기</span></span></button>
+        <button class="btn mode" data-go="gratitude"><span class="badge"><svg class="ic"><use href="#i-heart"/></svg></span><span class="mt"><span class="t">감사</span><span class="sub">감사한 것 하나 떠올리기</span></span></button>
       </div>
       <button class="softlink" data-go="lol"><svg class="ic"><use href="#i-game"/></svg>롤·유튜브 켜기 전이야?</button>
+    </div>
+  </section>
+
+  <!-- GRATITUDE -->
+  <section class="screen" data-screen="gratitude">
+    <div class="wrap">
+      <div class="title">오늘, <span class="em">감사한 것 하나</span>.</div>
+      <div class="lead" id="gratPrompt"></div>
+      <button class="softlink" id="gratWrite">하나 적어둘래 (선택)</button>
+      <input class="input collapsed" id="gratInput" placeholder="예: 따뜻한 커피 한 잔, 무사히 지난 하루" />
+      <button class="btn btn-soft" data-enough="gratitude"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
     </div>
   </section>
 
@@ -623,7 +637,7 @@ body{
         <div class="stat-sub" id="totalSub"></div>
       </div>
       <div class="weave" id="pearlWeave"></div>
-      <div class="log-head">오늘 건드린 것</div>
+      <div class="log-head">오늘 이끌린 것</div>
       <div class="log-list" id="logList"></div>
       <button class="softlink" data-go="home">처음으로</button>
     </div>
@@ -722,6 +736,7 @@ const SFX={
   off:[{freq:739.99,type:"triangle",att:.003,dec:.09,gain:.04}],
   inhale:[{freq:392,att:.55,dec:1.35,gain:.05},{freq:587.33,att:.55,dec:1.35,gain:.02,det:2}],
   exhale:[{freq:329.63,att:.18,dec:1.75,gain:.05},{freq:493.88,att:.18,dec:1.75,gain:.018,det:-2}],
+  gratitude:[{freq:880,att:.01,dec:.42,gain:.055},{freq:1318.51,att:.01,dec:.42,gain:.02}],
 };
 SFX.mile=SFX.enough;
 function sfx(name){
@@ -892,6 +907,7 @@ function show(name){
   if(name==="breath") startBreath(); else stopBreath();
   if(name==="prayer") startPrayer(); else stopPrayer();
   if(name==="cpick") renderCenterChips();
+  if(name==="gratitude") startGratitude();
   if(name==="center") startCenter();
   if(name==="word") loadVerse();
   if(name==="one") renderChips();
@@ -926,14 +942,31 @@ document.querySelectorAll(".softlink").forEach(b=>b.addEventListener("pointerdow
 let breathTimer=null;
 function startBreath(){
   const w=document.getElementById("breathWord"); stopBreath();
-  [document.querySelector(".orb-img"),document.querySelector(".orb-halo")].forEach(el=>{ if(el){ el.style.animation="none"; void el.offsetWidth; el.style.animation=""; } });
-  let inhale=true; w.textContent="들이쉬고…";
-  const cycle=()=>{ inhale=!inhale; w.style.opacity=0; sfx(inhale?"inhale":"exhale");
+  const orb=document.querySelector(".orb-img"), halo=document.querySelector(".orb-halo");
+  [orb,halo].forEach(el=>{ if(el){ el.style.animation="none"; el.style.transition="transform 3.8s ease-in-out"; } });
+  let inhale=true;
+  const grow=()=>{ if(orb) orb.style.transform="scale("+(inhale?1.13:0.9)+")"; if(halo) halo.style.transform="scale("+(inhale?1.17:0.93)+")"; };
+  w.textContent="들이쉬고…"; w.style.transition="opacity .4s ease"; w.style.opacity=1;
+  grow(); sfx("inhale");
+  const cycle=()=>{ inhale=!inhale; w.style.opacity=0; sfx(inhale?"inhale":"exhale"); grow();
     if(settings.cuesEnabled && navigator.vibrate){ try{ navigator.vibrate(inhale?30:[18,28]); }catch(_){} }
     setTimeout(()=>{ w.textContent=inhale?"들이쉬고…":"내쉬고…"; w.style.opacity=1; },450); };
-  w.style.transition="opacity .4s ease"; w.style.opacity=1; sfx("inhale"); breathTimer=setInterval(cycle,4000);
+  breathTimer=setInterval(cycle,4000);
 }
 function stopBreath(){ if(breathTimer){clearInterval(breathTimer);breathTimer=null;} }
+
+/* ============================================================ 감사 */
+const GRAT_PROMPTS=["작은 것이어도 괜찮아 — 따뜻한 물 한 잔, 햇살, 무사히 지난 하루.","떠오른 그 하나를, 잠깐 마음에 담아 봐.","누군가의 한마디, 숨 쉬는 지금, 그분의 돌보심.","당연하게 지나친 것 중 하나를 떠올려 봐.","고마운 마음, 그분께 한마디로 전해도 좋아."];
+function startGratitude(){
+  document.getElementById("gratPrompt").textContent=GRAT_PROMPTS[Math.floor(Math.random()*GRAT_PROMPTS.length)];
+  const inp=document.getElementById("gratInput"), tog=document.getElementById("gratWrite");
+  if(inp){ inp.value=""; inp.classList.add("collapsed"); } if(tog){ tog.style.display=""; }
+}
+document.getElementById("gratWrite").addEventListener("click",()=>{
+  const inp=document.getElementById("gratInput"), tog=document.getElementById("gratWrite");
+  inp.classList.toggle("collapsed");
+  if(!inp.classList.contains("collapsed")){ tog.style.display="none"; try{ inp.focus(); }catch(_){} }
+});
 
 /* ============================================================ 기도 */
 const PRAYER_LINES = [
@@ -1050,9 +1083,9 @@ document.getElementById("timerStop").addEventListener("click",()=>{
 });
 
 /* ============================================================ 로그 */
-const LOG_ICON={breath:"i-wind",word:"i-book",prayer:"i-candle",center:"i-lotus",fivemin:"i-clock"};
-const LOG_LABEL={breath:"호흡",word:"말씀",prayer:"기도",center:"고요",fivemin:"3분"};
-const PEARL_COL={breath:"171,159,228",word:"255,247,230",prayer:"240,210,150",center:"190,224,242",fivemin:"255,255,255"};
+const LOG_ICON={breath:"i-wind",word:"i-book",prayer:"i-candle",center:"i-lotus",fivemin:"i-clock",gratitude:"i-heart"};
+const LOG_LABEL={breath:"호흡",word:"말씀",prayer:"기도",center:"고요",fivemin:"3분",gratitude:"감사"};
+const PEARL_COL={breath:"171,159,228",word:"255,247,230",prayer:"240,210,150",center:"190,224,242",fivemin:"255,255,255",gratitude:"247,190,205"};
 function logAdd(type,thing){ const log=load(K.log,[]); log.push({ts:new Date().toISOString(),type,thing:thing||undefined}); save(K.log,log); checkMilestone(log.length); }
 
 /* 마일스톤 — 도달 순간에만 조용한 격려(누적 기준, streak/카운트다운 없음) */
@@ -1110,11 +1143,11 @@ function drawPearlSky(log, prevSeen){
 /* 멈춤의 결 — 모드별 누적(우열·퍼센트·막대 없음, 0=초대 여백) */
 function renderWeave(log){
   const box=document.getElementById("pearlWeave"); if(!box) return;
-  const order=["breath","word","prayer","center","fivemin"];
+  const order=["breath","word","prayer","center","gratitude","fivemin"];
   const cnt={}; order.forEach(t=>cnt[t]=0);
   log.forEach(e=>{ if(cnt[e.type]!=null) cnt[e.type]++; });
   const total=log.length;
-  const NOTE={breath:"요즘 너는 호흡으로 자주 멈췄구나.",word:"말씀 곁에 자주 머물렀네.",prayer:"기도 진주가 살며시 늘고 있어.",center:"고요 안에 자주 들렀구나.",fivemin:"작은 한 걸음을 여러 번 떼었네."};
+  const NOTE={breath:"요즘 너는 호흡으로 자주 멈췄구나.",word:"말씀 곁에 자주 머물렀네.",prayer:"기도 진주가 살며시 늘고 있어.",center:"고요 안에 자주 들렀구나.",gratitude:"감사가 살며시 쌓이고 있어.",fivemin:"작은 한 걸음을 여러 번 떼었네."};
   const top=order.slice().sort((a,b)=>cnt[b]-cnt[a])[0];
   let html = total ? "<div class='weave-note'>"+(NOTE[top]||"")+" 어느 게 많고 적고는 중요하지 않아. 다 너야.</div>" : "";
   order.forEach(t=>{
@@ -1164,11 +1197,16 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
   if(t==="prayer"){ lolFlag=false; show("prayer"); return; }
   if(t==="cpick"){ lolFlag=false; centerChoice=null; show("cpick"); return; }
   if(t==="breath"){ lolFlag=false; show("breath"); return; }
+  if(t==="gratitude"){ lolFlag=false; show("gratitude"); return; }
   if(t==="done"){ finishDone(); return; }
   show(t);
 }));
 function lolEnter(){ lolFlag=true; show("breath"); }
-document.querySelectorAll("[data-enough]").forEach(b=>b.addEventListener("click",()=>{ logAdd(b.dataset.enough); show("enough"); }));
+document.querySelectorAll("[data-enough]").forEach(b=>b.addEventListener("click",()=>{
+  const type=b.dataset.enough; let thing;
+  if(type==="gratitude"){ const v=document.getElementById("gratInput"); if(v && !v.classList.contains("collapsed") && v.value.trim()) thing=v.value.trim(); }
+  logAdd(type, thing); show("enough");
+}));
 function finishDone(){
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
   d.innerHTML="<span class='em'>그것도 좋아.</span>"; s.textContent="닫아도 성공이야.";
