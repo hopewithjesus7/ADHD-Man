@@ -247,7 +247,7 @@ body{
 /* 빛남: 사이클 맨 앞(0~32%)에서 같은 속도로 한 번 쓸고 지나간 뒤 나머지는 쉼 → 박스 sheen과 싱크 + 위→아래 순서 유지 */
 @keyframes shimmerText{0%{background-position:90% 0;}32%{background-position:10% 0;}100%{background-position:10% 0;}}
 .mt .t,.wm-num,.wm-rest,.ring-time,
-[data-screen="one"] .title,[data-screen="cpick"] .title,#centerChips .cw{
+[data-screen="one"] .title,[data-screen="cpick"] .title,#centerChips .cw,#oneChips .ow{
   background:linear-gradient(100deg,#5f5896 0%,#5f5896 38%,#ffffff 50%,#c6bbf0 60%,#5f5896 72%,#5f5896 100%);
   background-size:260% 100%;-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;color:transparent;
@@ -274,6 +274,21 @@ body{
 #centerChips .chip:nth-child(1) .cw{animation-delay:var(--shine-sync);}
 #centerChips .chip:nth-child(2) .cw{animation-delay:calc(var(--shine)*0.2 + var(--shine-sync));}
 #centerChips .chip:nth-child(3) .cw{animation-delay:calc(var(--shine)*0.4 + var(--shine-sync));}
+/* Pass6 — 한 가지(one) 칩도 랜딩처럼: iris 테두리 + sheen + 단어 shimmer (3개 웨이브) */
+#oneChips .chip::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;opacity:.75;pointer-events:none;z-index:0;
+  background:var(--g-iris) center/cover no-repeat;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;}
+#oneChips .chip::after{content:"";position:absolute;top:0;left:-72%;width:56%;height:100%;pointer-events:none;z-index:1;
+  background:var(--g-sheen) center/cover no-repeat;transform:skewX(-16deg);mix-blend-mode:screen;opacity:0;
+  animation:sheen var(--shine) ease-in-out infinite;}
+#oneChips .chip>*{position:relative;z-index:2;}
+#oneChips .chip:nth-child(1)::after{animation-delay:0s;}
+#oneChips .chip:nth-child(2)::after{animation-delay:calc(var(--shine)*0.2);}
+#oneChips .chip:nth-child(3)::after{animation-delay:calc(var(--shine)*0.4);}
+#oneChips .chip:nth-child(1) .ow{animation-delay:var(--shine-sync);}
+#oneChips .chip:nth-child(2) .ow{animation-delay:calc(var(--shine)*0.2 + var(--shine-sync));}
+#oneChips .chip:nth-child(3) .ow{animation-delay:calc(var(--shine)*0.4 + var(--shine-sync));}
 /* Pass5 — 기록 탭: 진주 하늘 / 누적 / 멈춤의 결 / 마일스톤 리본 */
 .pearlsky{width:100%;height:24vh;max-height:210px;border-radius:var(--r);border:1px solid var(--glass-line);
   background:linear-gradient(165deg,#8f86bf,#a39ecb 52%,#b7b0d8);
@@ -557,8 +572,8 @@ body{
   <!-- LOL -->
   <section class="screen" data-screen="lol">
     <div class="wrap">
-      <div class="title">이제 가서 즐겨도 돼.</div>
-      <div class="lead">근데 3분만, 딱 하나 먼저 해볼래?</div>
+      <div class="title" id="lolTitle">이제 가서 즐겨도 돼.</div>
+      <div class="lead" id="lolLead">근데 3분만, 딱 하나 먼저 해볼래?</div>
       <button class="btn btn-primary" id="lolFirst"><svg class="ic"><use href="#i-clock"/></svg> 3분 먼저 해볼래</button>
       <button class="btn btn-ghost" id="lolGo">그냥 갈래</button>
     </div>
@@ -683,6 +698,8 @@ const SFX={
   shuffle:[{freq:880,att:.003,dec:.11,gain:.045},{freq:1108.73,att:.003,dec:.11,gain:.04,delay:.035}],
   on:[{freq:783.99,type:"triangle",att:.003,dec:.09,gain:.04}],
   off:[{freq:739.99,type:"triangle",att:.003,dec:.09,gain:.04}],
+  inhale:[{freq:392,att:.55,dec:1.35,gain:.05},{freq:587.33,att:.55,dec:1.35,gain:.02,det:2}],
+  exhale:[{freq:329.63,att:.18,dec:1.75,gain:.05},{freq:493.88,att:.18,dec:1.75,gain:.018,det:-2}],
 };
 SFX.mile=SFX.enough;
 function sfx(name){
@@ -842,7 +859,7 @@ const screens = {};
 document.querySelectorAll(".screen").forEach(s=>screens[s.dataset.screen]=s);
 let current = "home", lolFlag=false, oneThing=null, enoughTimer=null;
 if(screens["enough"]) screens["enough"].addEventListener("click",()=>{
-  if(current==="enough"){ if(enoughTimer){ clearTimeout(enoughTimer); enoughTimer=null; } show(lolFlag?"lol":"one"); }
+  if(current==="enough"){ if(enoughTimer){ clearTimeout(enoughTimer); enoughTimer=null; } show("lol"); }
 });
 
 function show(name){
@@ -858,9 +875,10 @@ function show(name){
   if(name==="one") renderChips();
   if(name==="timer") startTimer();
   if(name==="log") renderLog();
+  if(name==="lol") setLolGate();
   if(["breath","timer","center","prayer"].includes(name)) startField(name); else stopField();
   if(name!=="log") stopPearlSky();
-  if(name==="enough"){ enoughTimer=setTimeout(()=>{ enoughTimer=null; show(lolFlag ? "lol" : "one"); }, 1600); }
+  if(name==="enough"){ enoughTimer=setTimeout(()=>{ enoughTimer=null; show("lol"); }, 1600); }
   if(name==="home") refreshGreeting();
   // 처음으로 단축키: 홈 화면엔 숨기고 나머지 화면에서만 노출
   const homeBtn=document.getElementById("navHome");
@@ -888,9 +906,10 @@ function startBreath(){
   const w=document.getElementById("breathWord"); stopBreath();
   [document.querySelector(".orb-img"),document.querySelector(".orb-halo")].forEach(el=>{ if(el){ el.style.animation="none"; void el.offsetWidth; el.style.animation=""; } });
   let inhale=true; w.textContent="들이쉬고…";
-  const cycle=()=>{ inhale=!inhale; w.style.opacity=0; cue({freq: inhale?528:392});
+  const cycle=()=>{ inhale=!inhale; w.style.opacity=0; sfx(inhale?"inhale":"exhale");
+    if(settings.cuesEnabled && navigator.vibrate){ try{ navigator.vibrate(inhale?30:[18,28]); }catch(_){} }
     setTimeout(()=>{ w.textContent=inhale?"들이쉬고…":"내쉬고…"; w.style.opacity=1; },450); };
-  w.style.transition="opacity .4s ease"; w.style.opacity=1; cue({freq:528}); breathTimer=setInterval(cycle,4000);
+  w.style.transition="opacity .4s ease"; w.style.opacity=1; sfx("inhale"); breathTimer=setInterval(cycle,4000);
 }
 function stopBreath(){ if(breathTimer){clearInterval(breathTimer);breathTimer=null;} }
 
@@ -969,7 +988,7 @@ function renderChips(){
   const box=document.getElementById("oneChips"); box.innerHTML="";
   pick3().forEach((t,i)=>{
     const b=document.createElement("button"); b.className="chip"+(i===0?" rec":"");
-    b.innerHTML=(i===0?"<span class='rectag'>이거 어때?</span>":"")+"<span>"+t+"</span>";
+    b.innerHTML=(i===0?"<span class='rectag'>이거 어때?</span>":"")+"<span class='ow'>"+t+"</span>";
     b.addEventListener("pointerdown",ripple);
     b.addEventListener("click",()=>{ oneThing=t; show("timer"); });
     box.appendChild(b);
@@ -1131,10 +1150,16 @@ function finishDone(){
   d.innerHTML="<span class='em'>그것도 좋아.</span>"; s.textContent="닫아도 성공이야.";
   document.getElementById("doneMore").classList.add("collapsed"); show("done");
 }
+function setLolGate(){
+  const lt=document.getElementById("lolTitle"), ll=document.getElementById("lolLead"), lf=document.getElementById("lolFirst"), lg=document.getElementById("lolGo");
+  if(lolFlag){ lt.textContent="이제 가서 즐겨도 돼."; ll.textContent="근데 3분만, 딱 하나 먼저 해볼래?"; lf.innerHTML="<svg class='ic'><use href='#i-clock'/></svg> 3분 먼저 해볼래"; lg.textContent="그냥 갈래"; }
+  else { lt.textContent="이거면 충분해."; ll.textContent="3분만, 딱 하나 해볼래?"; lf.innerHTML="<svg class='ic'><use href='#i-clock'/></svg> 좋아, 3분"; lg.textContent="오늘은 여기까지"; }
+}
 document.getElementById("lolFirst").addEventListener("click",()=>{ show("one"); });
 document.getElementById("lolGo").addEventListener("click",()=>{
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
-  d.innerHTML="<span class='em'>재밌게 해.</span>"; s.textContent="죄책감 금지.";
+  if(lolFlag){ d.innerHTML="<span class='em'>재밌게 해.</span>"; s.textContent="죄책감 금지."; }
+  else { d.innerHTML="<span class='em'>그것도 좋아.</span>"; s.textContent="닫아도 성공이야."; }
   document.getElementById("doneMore").classList.add("collapsed"); show("done");
 });
 document.getElementById("moreNew").addEventListener("click",()=>show("one"));
