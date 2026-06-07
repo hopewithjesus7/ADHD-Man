@@ -242,6 +242,21 @@ body{
 .done-more .softlink .ic{color:#fff;}
 .done-more .mini{font-size:13.5px;color:#fff;padding:8px 14px;}
 #doneSub{margin-top:-10px;}
+/* 진짜 일 다리(done) — 작은 일 끝낸 뒤 회피하던 진짜 일 한 조각으로 잇기 */
+.bridge{display:flex;flex-direction:column;align-items:stretch;gap:9px;width:100%;max-width:330px;margin:4px auto 2px;}
+.bridge-q{font-size:14.5px;color:#fff;font-weight:650;line-height:1.55;text-align:center;text-wrap:pretty;
+  text-shadow:0 1px 3px rgba(58,50,96,.62),0 0 12px rgba(90,76,140,.45);margin-bottom:2px;}
+.bridge-chips{display:flex;flex-direction:column;gap:7px;width:100%;}
+.bridge-row{display:flex;align-items:stretch;gap:6px;width:100%;}
+.bridge-row .bridge-chip{flex:1;min-width:0;justify-content:flex-start;}
+.bridge-row .bridge-chip span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bridge-mini{flex:none;width:42px;border-radius:15px;border:1px solid rgba(255,255,255,.42);
+  background:rgba(122,105,178,.3);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:17px;transition:transform .25s var(--ease);}
+.bridge-mini .ic{color:#fff;font-size:18px;}
+.bridge-mini:active{transform:scale(.9);}
+.bridge-same{justify-content:center;}
+.bridge-input .input{padding:13px 16px;font-size:15px;}
 /* Pass2 — 접기 */
 .collapsed{display:none!important;}
 /* Pass4 — ethereal 빛남: 위→아래 동기화 웨이브 + 더 많은 페이지 반영 */
@@ -463,6 +478,8 @@ body{
   <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.4 4.8 13.2a4.3 4.3 0 0 1 6.1-6.1l1.1 1.1 1.1-1.1a4.3 4.3 0 0 1 6.1 6.1Z"/></symbol>
   <symbol id="i-sound" viewBox="0 0 24 24"><path d="M5 9.3h3.2L12.5 6v12L8.2 14.7H5z"/><path d="M15.6 9.2a4 4 0 0 1 0 5.6"/><path d="M18 7a7 7 0 0 1 0 10"/></symbol>
   <symbol id="i-mute" viewBox="0 0 24 24"><path d="M5 9.3h3.2L12.5 6v12L8.2 14.7H5z"/><path d="M16 9.5l4.5 5M20.5 9.5l-4.5 5"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M14.4 6.6l3 3M4.5 19.5l1-3.9L15.6 5.5a1.7 1.7 0 0 1 2.4 0l.5.5a1.7 1.7 0 0 1 0 2.4L8.4 18.5l-3.9 1z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></symbol>
 </svg>
 
 <div class="bg-img"></div>
@@ -616,7 +633,7 @@ body{
           <div class="ring-thing" id="ringThing"></div>
         </div>
       </div>
-      <div class="fade-line">3분. 이거 하나면 돼.</div>
+      <div class="fade-line" id="timerHint">3분. 이거 하나면 돼.</div>
       <button class="btn btn-soft" id="timerStop"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
     </div>
   </section>
@@ -638,8 +655,16 @@ body{
       <div class="title" id="doneText"><span class="em">해냈다. 진짜로.</span></div>
       <div class="lead" id="doneSub" style="color: rgb(245, 245, 245)">닫아도 성공이야.</div>
       <div class="done-more collapsed" id="doneMore">
-        <button class="softlink" id="moreNew"><svg class="ic"><use href="#i-sprout"/></svg>한 가지만 더 해볼까?</button>
-        <button class="softlink mini" id="moreSame">방금 거 한 번 더</button>
+        <div class="bridge" id="doneBridge">
+          <div class="bridge-q" id="bridgeQ"></div>
+          <button class="softlink bridge-same collapsed" id="moreSame">그거 이어서 — 3분 더</button>
+          <div class="bridge-chips" id="bridgeChips"></div>
+          <div class="bridge-input collapsed" id="bridgeInputWrap">
+            <input class="input" id="bridgeInput" placeholder="예: 그 메일, 그 과제, 그 전화…" maxlength="60" />
+          </div>
+          <button class="softlink bridge-add" id="bridgeAdd"><svg class="ic"><use href="#i-pencil"/></svg>한 줄로 적기</button>
+        </div>
+        <button class="softlink mini" id="moreNew"><svg class="ic"><use href="#i-sprout"/></svg>다른 작은 거 하나 더</button>
       </div>
     </div>
   </section>
@@ -685,7 +710,8 @@ body{
 
 <div class="ribbon" id="mileRibbon"></div>
 
-<audio id="bgmBed" loop preload="none"><source src="assets/bed.mp3" type="audio/mpeg"></audio>
+<audio id="bgmBed1" preload="none"><source src="assets/bed1.mp3" type="audio/mpeg"></audio>
+<audio id="bgmBed2" preload="none"><source src="assets/bed2.mp3" type="audio/mpeg"></audio>
 <audio id="bgmPrayer" loop preload="none"><source src="assets/prayer_underscore.mp3" type="audio/mpeg"></audio>
 <audio id="sndComplete" preload="auto"><source src="assets/completion_swell.mp3" type="audio/mpeg"></audio>
 <audio id="sndWelcome" preload="auto"><source src="assets/welcome_breath_in.mp3" type="audio/mpeg"></audio>
@@ -696,7 +722,7 @@ body{
    60초 리셋 — Liquid Pearl Aura edition
    실패 불가능 / 죄책감 0 / 한 번에 하나 / 열 때마다 새 출발
    ============================================================ */
-const K = { settings:"reset60:settings", log:"reset60:log", lastOpen:"reset60:lastOpen", pearlSeen:"reset60:pearlSeen", mileSeen:"reset60:mileSeen" };
+const K = { settings:"reset60:settings", log:"reset60:log", lastOpen:"reset60:lastOpen", pearlSeen:"reset60:pearlSeen", mileSeen:"reset60:mileSeen", realTasks:"reset60:realTasks" };
 const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -767,8 +793,9 @@ function sfx(name){
 }
 /* ---------- 셔플/구절 교체 부드러운 페이드 ---------- */
 function fadeSwap(el, fn){ if(!el){ fn(); return; } el.style.transition="opacity .26s var(--ease)"; el.style.opacity="0"; setTimeout(()=>{ fn(); el.style.opacity="1"; },200); }
-/* ---------- 배경 음악(잔잔한 음악): 끊기지 않는 단일 베드 + 기도 오버레이 + 완료/웰컴 원샷 ---------- */
-const BED_VOL=0.5, PRAYER_VOL=0.32; let bedStarted=false;
+/* ---------- 배경 음악(잔잔한 음악): 두 베드(v1↔v2)를 크로스페이드로 끝없이 이어 재생 + 기도 오버레이 + 완료/웰컴 원샷 ---------- */
+const BED_VOL=0.5, PRAYER_VOL=0.32, BED_XF=6; let bedStarted=false, bedIdx=0, bedHanding=false, bedHandTO=null, bedGen=0;
+function bedEls(){ return [document.getElementById("bgmBed1"), document.getElementById("bgmBed2")]; }
 function fadeAudio(el, to, ms){
   if(!el) return; if(el._fade) clearInterval(el._fade);
   if(to>0 && el.paused){ try{ el.play().catch(()=>{}); }catch(_){} }
@@ -776,14 +803,44 @@ function fadeAudio(el, to, ms){
   el._fade=setInterval(()=>{ i++; el.volume=Math.max(0,Math.min(1,from+(to-from)*(i/steps)));
     if(i>=steps){ clearInterval(el._fade); el._fade=null; if(to<=0){ try{ el.pause(); }catch(_){} } } },40);
 }
+function clearHandTO(){ if(bedHandTO){ clearTimeout(bedHandTO); bedHandTO=null; } }
+/* 한 곡 끝(BED_XF초 전)에 다른 곡을 0부터 띄워 크로스페이드 → 같은 곡 반복 대신 v1·v2가 번갈아 흐름.
+   세대(bedGen) 토큰으로 늦게 도착한 play() 콜백을 무효화 → OFF/재진입 레이스로 두 곡이 겹치거나 무음 정지하는 것 방지.
+   다음 곡 재생이 '확정된 뒤에만' 현재 곡을 줄여 무음 위험 제거(실패 시 현재 곡 유지) */
+function bedTick(){
+  if(!bedStarted || bedHanding) return;
+  const els=bedEls(), cur=els[bedIdx]; if(!cur) return;
+  const D=cur.duration; if(!isFinite(D)||D<1) return;
+  if(cur.currentTime < D-BED_XF) return;
+  const nxt=els[bedIdx^1]; if(!nxt) return;
+  bedHanding=true; const g=bedGen;
+  try{ nxt.currentTime=0; }catch(_){} nxt.volume=0;
+  nxt.play().then(()=>{
+    if(!bedStarted || g!==bedGen) return;            // 늦게 온 콜백 — 이미 정지/재시작됨
+    fadeAudio(nxt,BED_VOL,BED_XF*1000);
+    fadeAudio(cur,0,BED_XF*1000);
+    bedIdx^=1;
+    clearHandTO(); bedHandTO=setTimeout(()=>{ bedHanding=false; bedHandTO=null; }, BED_XF*1000+250);
+  }).catch(()=>{ if(g===bedGen) bedHanding=false; });  // 다음 곡 재생 실패 → 현재 곡 그대로 유지
+}
 function ensureBed(){
   if(!settings.musicEnabled || bedStarted) return; bedStarted=true;
-  const bed=document.getElementById("bgmBed"); if(!bed) return;
-  bed.volume=0; bed.play().then(()=>fadeAudio(bed,BED_VOL,1400)).catch(()=>{ bedStarted=false; });
+  clearHandTO(); bedGen++; const g=bedGen;
+  const els=bedEls(); bedIdx=0; bedHanding=false;
+  els.forEach(el=>{ if(!el) return;
+    if(el._fade){ clearInterval(el._fade); el._fade=null; }
+    try{ el.pause(); el.currentTime=0; }catch(_){} el.volume=0;
+    if(!el._bedwired){ el._bedwired=true;
+      el.addEventListener("timeupdate",bedTick);
+      el.addEventListener("ended",()=>{ if(bedStarted && !bedHanding) bedTick(); }); } });
+  const bed=els[0]; if(!bed){ bedStarted=false; return; }
+  bed.play().then(()=>{ if(bedStarted && g===bedGen) fadeAudio(bed,BED_VOL,1400); }).catch(()=>{ bedStarted=false; });
+  /* iOS 자동재생 잠금 해제: 두 번째 베드를 사용자 제스처 안에서 무음 prime(나중 핸드오프 거부 방지) */
+  const b2=els[1]; if(b2){ try{ const pp=b2.play(); if(pp&&pp.then) pp.then(()=>{ try{ b2.pause(); b2.currentTime=0; b2.volume=0; }catch(_){} }).catch(()=>{}); }catch(_){} }
   try{ if(typeof sessionStorage!=="undefined" && !sessionStorage.getItem("welcomed")){ sessionStorage.setItem("welcomed","1");
     const w=document.getElementById("sndWelcome"); if(w){ w.volume=0.6; w.currentTime=0; w.play().catch(()=>{}); } } }catch(_){}
 }
-function stopBed(){ bedStarted=false; fadeAudio(document.getElementById("bgmBed"),0,800); fadeAudio(document.getElementById("bgmPrayer"),0,500); }
+function stopBed(){ bedStarted=false; bedHanding=false; clearHandTO(); bedGen++; bedEls().forEach(el=>fadeAudio(el,0,800)); fadeAudio(document.getElementById("bgmPrayer"),0,500); }
 function playComplete(){
   if(!settings.musicEnabled) return false;
   const s=document.getElementById("sndComplete"); if(!s) return false;
@@ -934,7 +991,7 @@ const ONE_POOL = [
    ============================================================ */
 const screens = {};
 document.querySelectorAll(".screen").forEach(s=>screens[s.dataset.screen]=s);
-let current = "home", lolFlag=false, oneThing=null, enoughTimer=null;
+let current = "home", lolFlag=false, oneThing=null, oneIsReal=false, enoughTimer=null;
 if(screens["enough"]) screens["enough"].addEventListener("click",()=>{
   if(current==="enough"){ if(enoughTimer){ clearTimeout(enoughTimer); enoughTimer=null; } show("lol"); }
 });
@@ -980,21 +1037,30 @@ document.querySelectorAll(".icon-btn").forEach(b=>b.addEventListener("pointerdow
 document.querySelectorAll(".softlink").forEach(b=>b.addEventListener("pointerdown",()=>sfx(/Reshuffle$|verseAnother/.test(b.id)?"shuffle":"tap")));
 
 /* ============================================================ 호흡 */
-let breathTimer=null;
+let breathTimer=null, breathTO=null;
+/* 들이쉬기 1.22배까지 확대 / 내쉬기 0.85배 — 늘었다↔줄었다 느낌 강조 */
+const BR_IN_ORB=1.22, BR_OUT_ORB=0.85, BR_IN_HALO=1.26, BR_OUT_HALO=0.88;
 function startBreath(){
   const w=document.getElementById("breathWord"); stopBreath();
   const orb=document.querySelector(".orb-img"), halo=document.querySelector(".orb-halo");
-  [orb,halo].forEach(el=>{ if(el){ el.style.animation="none"; el.style.transition="transform 3.8s ease-in-out"; } });
+  /* 시작은 '내쉰(작은)' 상태에서 — 전환 끄고 고정 후 리플로우 → 첫 들이쉬기가 정지가 아니라 실제로 커지는 게 보이도록 */
+  [orb,halo].forEach(el=>{ if(el){ el.style.animation="none"; el.style.transition="none"; } });
+  if(orb) orb.style.transform="scale("+BR_OUT_ORB+")";
+  if(halo) halo.style.transform="scale("+BR_OUT_HALO+")";
+  void (orb ? orb.offsetWidth : 0);
   let inhale=true;
-  const grow=()=>{ if(orb) orb.style.transform="scale("+(inhale?1.13:0.9)+")"; if(halo) halo.style.transform="scale("+(inhale?1.17:0.93)+")"; };
+  const grow=()=>{ if(orb) orb.style.transform="scale("+(inhale?BR_IN_ORB:BR_OUT_ORB)+")"; if(halo) halo.style.transform="scale("+(inhale?BR_IN_HALO:BR_OUT_HALO)+")"; };
+  [orb,halo].forEach(el=>{ if(el) el.style.transition="transform 3.8s ease-in-out"; });
   w.textContent="들이쉬고…"; w.style.transition="opacity .4s ease"; w.style.opacity=1;
-  grow(); sfx("inhale");
+  sfx("inhale");
+  if(settings.cuesEnabled && navigator.vibrate){ try{ navigator.vibrate(30); }catch(_){} }
+  breathTO=setTimeout(grow,40);   // 전환 켜진 다음 프레임에 커지기 시작 → 작은→큰 전환 보장
   const cycle=()=>{ inhale=!inhale; w.style.opacity=0; sfx(inhale?"inhale":"exhale"); grow();
     if(settings.cuesEnabled && navigator.vibrate){ try{ navigator.vibrate(inhale?30:[18,28]); }catch(_){} }
     setTimeout(()=>{ w.textContent=inhale?"들이쉬고…":"내쉬고…"; w.style.opacity=1; },450); };
   breathTimer=setInterval(cycle,4000);
 }
-function stopBreath(){ if(breathTimer){clearInterval(breathTimer);breathTimer=null;} }
+function stopBreath(){ if(breathTimer){clearInterval(breathTimer);breathTimer=null;} if(breathTO){clearTimeout(breathTO);breathTO=null;} }
 
 /* ============================================================ 감사 */
 const GRAT_PROMPTS=["작은 것이어도 괜찮아 — 따뜻한 물 한 잔, 햇살, 무사히 지난 하루.","떠오른 그 하나를, 잠깐 마음에 담아 봐.","누군가의 한마디, 숨 쉬는 지금, 그분의 돌보심.","당연하게 지나친 것 중 하나를 떠올려 봐.","고마운 마음, 그분께 한마디로 전해도 좋아."];
@@ -1134,7 +1200,7 @@ function renderChips(){
     const b=document.createElement("button"); b.className="chip"+(i===0?" rec":"");
     b.innerHTML=(i===0?"<span class='rectag'>이거 어때?</span>":"")+"<span class='ow'>"+t+"</span>";
     b.addEventListener("pointerdown",ripple);
-    b.addEventListener("click",()=>{ oneThing=t; show("timer"); });
+    b.addEventListener("click",()=>{ oneThing=t; oneIsReal=false; show("timer"); });
     box.appendChild(b);
   });
 }
@@ -1148,6 +1214,8 @@ function fmt(s){ const m=Math.floor(s/60), ss=s%60; return m+":"+String(ss).padS
 function startTimer(){
   remain=TOTAL;
   document.getElementById("ringThing").textContent=oneThing||"";
+  const th=document.getElementById("timerHint");
+  if(th) th.textContent = oneIsReal ? "끝낼 필요 없어 — 딱 첫 동작 하나만." : "3분. 이거 하나면 돼.";
   document.getElementById("ringTime").textContent=fmt(remain);
   ringFg.style.strokeDashoffset=0; clearInterval(timerId);
   timerId=setInterval(()=>{
@@ -1162,6 +1230,7 @@ function finishTimer(complete){
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
   if(complete){ d.innerHTML="<span class='em'>해냈다. 진짜로.</span>"; s.textContent="닫아도 성공이야."; if(!playComplete()) sfx("enough"); }
   else { d.innerHTML="<span class='em'>이거면 충분해.</span>"; s.textContent="시작한 것만으로 충분해."; }
+  renderDoneBridge();
   document.getElementById("doneMore").classList.remove("collapsed");
   show("done");
 }
@@ -1306,6 +1375,67 @@ document.getElementById("lolGo").addEventListener("click",()=>{
   if(lolFlag){ d.innerHTML="<span class='em'>재밌게 해.</span>"; s.textContent="죄책감 금지."; }
   else { d.innerHTML="<span class='em'>그것도 좋아.</span>"; s.textContent="닫아도 성공이야."; }
   document.getElementById("doneMore").classList.add("collapsed"); show("done");
+});
+/* ---------- 진짜 일 다리(done) — 작은 일 끝낸 뒤, 회피하던 진짜 일을 '첫 한 동작'으로 잇기 ---------- */
+function loadRealTasks(){ const a=load(K.realTasks,[]); return Array.isArray(a)?a:[]; }
+function saveRealTask(t){ t=(t||"").trim(); if(!t) return; let a=loadRealTasks().filter(x=>x!==t); a.unshift(t); save(K.realTasks,a.slice(0,4)); }
+function removeRealTask(t){ save(K.realTasks, loadRealTasks().filter(x=>x!==t)); }
+function startReal(t){ t=(t||"").trim(); if(!t) return; oneThing=t; oneIsReal=true; saveRealTask(t); show("timer"); }
+function resetBridgeAdd(){
+  const wrap=document.getElementById("bridgeInputWrap"), inp=document.getElementById("bridgeInput"), add=document.getElementById("bridgeAdd");
+  if(wrap) wrap.classList.add("collapsed");
+  if(inp){ inp.value=""; inp._editing=null; }
+  if(add) add.classList.remove("collapsed");
+}
+function openBridgeInput(prefill){
+  const wrap=document.getElementById("bridgeInputWrap"), inp=document.getElementById("bridgeInput"), add=document.getElementById("bridgeAdd");
+  if(!wrap||!inp||!add) return;
+  wrap.classList.remove("collapsed"); add.classList.add("collapsed");
+  inp.value=prefill||""; inp._editing=prefill||null;
+  try{ inp.focus(); if(prefill&&inp.select) inp.select(); }catch(_){}
+}
+function renderBridgeChips(){
+  const box=document.getElementById("bridgeChips"); if(!box) return 0; box.innerHTML="";
+  let a=loadRealTasks(); if(oneIsReal && oneThing) a=a.filter(x=>x!==oneThing);
+  a=a.slice(0,4);
+  a.forEach(t=>{
+    const row=document.createElement("div"); row.className="bridge-row";
+    const go=document.createElement("button"); go.className="softlink bridge-chip";
+    const sp=document.createElement("span"); sp.textContent=t; go.appendChild(sp);
+    go.addEventListener("pointerdown",()=>{ sfx("tap"); ensureBed(); });
+    go.addEventListener("click",()=>startReal(t));
+    const ed=document.createElement("button"); ed.className="bridge-mini"; ed.setAttribute("aria-label","수정");
+    ed.innerHTML="<svg class='ic'><use href='#i-pencil'/></svg>";
+    ed.addEventListener("click",()=>{ sfx("tap"); openBridgeInput(t); });
+    const del=document.createElement("button"); del.className="bridge-mini"; del.setAttribute("aria-label","지우기");
+    del.innerHTML="<svg class='ic'><use href='#i-x'/></svg>";
+    del.addEventListener("click",()=>{ removeRealTask(t); sfx("off"); renderBridgeChips(); });
+    row.appendChild(go); row.appendChild(ed); row.appendChild(del);
+    box.appendChild(row);
+  });
+  return a.length;
+}
+function renderDoneBridge(){
+  resetBridgeAdd();
+  const q=document.getElementById("bridgeQ"), moreSame=document.getElementById("moreSame"), moreNew=document.getElementById("moreNew");
+  const have=renderBridgeChips();
+  if(oneIsReal){
+    if(q) q.textContent="그거, 조금만 더 이어서 갈래?";
+    if(moreSame){ moreSame.textContent="그거 이어서 — 3분 더"; moreSame.classList.remove("collapsed"); }
+    if(moreNew) moreNew.innerHTML="<svg class='ic'><use href='#i-sprout'/></svg>다른 작은 거 하나";
+  } else {
+    if(q) q.textContent = have ? "이 기세로, 마음에 걸리던 거 한 조각 가볼까?" : "마음에 걸리던 거 하나, 한 줄로 적어둘래?";
+    if(moreSame) moreSame.classList.add("collapsed");
+    if(moreNew) moreNew.innerHTML="<svg class='ic'><use href='#i-sprout'/></svg>다른 작은 거 하나 더";
+  }
+}
+document.getElementById("bridgeAdd").addEventListener("click",()=>{ sfx("tap"); ensureBed(); openBridgeInput(""); });
+document.getElementById("bridgeInput").addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return; e.preventDefault();
+  const inp=e.target, v=inp.value.trim();
+  if(!v){ resetBridgeAdd(); return; }
+  if(inp._editing){ const old=inp._editing; inp._editing=null; if(v!==old){ removeRealTask(old); saveRealTask(v); } resetBridgeAdd(); renderBridgeChips(); sfx("chip"); }
+  else { startReal(v); }
 });
 document.getElementById("moreNew").addEventListener("click",()=>show("one"));
 document.getElementById("moreSame").addEventListener("click",()=>{ if(oneThing) show("timer"); else show("one"); });
