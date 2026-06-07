@@ -675,11 +675,20 @@ body{
       <div><div class="label">탭 소리</div><div class="desc">유리 진주처럼 맑고 작은 소리. 알람 아냐 — 누를 때만 살짝.</div></div>
       <button class="toggle" id="tgSfx"></button>
     </div>
+    <div class="row">
+      <div><div class="label">잔잔한 음악</div><div class="desc">은은한 배경 음악. 화면을 옮겨도 끊기지 않아.</div></div>
+      <button class="toggle" id="tgMusic"></button>
+    </div>
     <div class="hint">폰 홈 화면에 추가해두면 오프라인에서도, 더 빠르게 열려.</div>
   </div>
 </div>
 
 <div class="ribbon" id="mileRibbon"></div>
+
+<audio id="bgmBed" loop preload="none"><source src="assets/bed.mp3" type="audio/mpeg"></audio>
+<audio id="bgmPrayer" loop preload="none"><source src="assets/prayer_underscore.mp3" type="audio/mpeg"></audio>
+<audio id="sndComplete" preload="auto"><source src="assets/completion_swell.mp3" type="audio/mpeg"></audio>
+<audio id="sndWelcome" preload="auto"><source src="assets/welcome_breath_in.mp3" type="audio/mpeg"></audio>
 
 <script>
 "use strict";
@@ -695,7 +704,7 @@ const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent||"") || (navigator.platform==="MacIntel" && (navigator.maxTouchPoints||0)>1);
 if(isIOS && document.documentElement) document.documentElement.classList.add("flat-text");
 
-const DEFAULT_SETTINGS = { cuesEnabled:true, sfxEnabled:true, prayerMuted:false, dflt2:true };
+const DEFAULT_SETTINGS = { cuesEnabled:true, sfxEnabled:true, prayerMuted:false, musicEnabled:true, dflt2:true };
 let settings = Object.assign({}, DEFAULT_SETTINGS, load(K.settings, {}));
 /* 신호·탭소리를 기본 ON으로 — 이전에 설정이 저장된 사용자도 한 번만 적용(이후 직접 끄면 그 선택 유지) */
 if(!settings.dflt2){ settings.cuesEnabled=true; settings.sfxEnabled=true; settings.dflt2=true; save(K.settings,settings); }
@@ -758,6 +767,28 @@ function sfx(name){
 }
 /* ---------- 셔플/구절 교체 부드러운 페이드 ---------- */
 function fadeSwap(el, fn){ if(!el){ fn(); return; } el.style.transition="opacity .26s var(--ease)"; el.style.opacity="0"; setTimeout(()=>{ fn(); el.style.opacity="1"; },200); }
+/* ---------- 배경 음악(잔잔한 음악): 끊기지 않는 단일 베드 + 기도 오버레이 + 완료/웰컴 원샷 ---------- */
+const BED_VOL=0.5, PRAYER_VOL=0.32; let bedStarted=false;
+function fadeAudio(el, to, ms){
+  if(!el) return; if(el._fade) clearInterval(el._fade);
+  if(to>0 && el.paused){ try{ el.play().catch(()=>{}); }catch(_){} }
+  const from=isFinite(el.volume)?el.volume:0, steps=Math.max(1,Math.round((ms||800)/40)); let i=0;
+  el._fade=setInterval(()=>{ i++; el.volume=Math.max(0,Math.min(1,from+(to-from)*(i/steps)));
+    if(i>=steps){ clearInterval(el._fade); el._fade=null; if(to<=0){ try{ el.pause(); }catch(_){} } } },40);
+}
+function ensureBed(){
+  if(!settings.musicEnabled || bedStarted) return; bedStarted=true;
+  const bed=document.getElementById("bgmBed"); if(!bed) return;
+  bed.volume=0; bed.play().then(()=>fadeAudio(bed,BED_VOL,1400)).catch(()=>{ bedStarted=false; });
+  try{ if(typeof sessionStorage!=="undefined" && !sessionStorage.getItem("welcomed")){ sessionStorage.setItem("welcomed","1");
+    const w=document.getElementById("sndWelcome"); if(w){ w.volume=0.6; w.currentTime=0; w.play().catch(()=>{}); } } }catch(_){}
+}
+function stopBed(){ bedStarted=false; fadeAudio(document.getElementById("bgmBed"),0,800); fadeAudio(document.getElementById("bgmPrayer"),0,500); }
+function playComplete(){
+  if(!settings.musicEnabled) return false;
+  const s=document.getElementById("sndComplete"); if(!s) return false;
+  try{ s.volume=0.78; s.currentTime=0; s.play().catch(()=>{}); return true; }catch(_){ return false; }
+}
 
 /* ============================================================
    ✦ Sparkle field — 흰 반짝임 (canvas)
@@ -942,6 +973,7 @@ function ripple(e){
   if(navigator.vibrate) try{navigator.vibrate(8);}catch(_){}
   const go=b.dataset.go;
   sfx( (go && SFX[go]) ? go : (b.dataset.enough || b.id==="timerStop" || b.id==="gratDone") ? "enough" : b.classList.contains("chip") ? "chip" : "tap" );
+  ensureBed();
 }
 document.querySelectorAll(".btn,.chip").forEach(b=>b.addEventListener("pointerdown",ripple));
 document.querySelectorAll(".icon-btn").forEach(b=>b.addEventListener("pointerdown",()=>sfx("tap")));
@@ -1032,6 +1064,7 @@ function startPrayer(){
   const el=document.getElementById("prayerLine"), hint=document.getElementById("prayerHint");
   hint.textContent="눈 감고 외워도, 천천히 읽어도 좋아.";
   prayerCur=-1; renderPrayerCue(0); updatePrayerMute();
+  if(settings.musicEnabled && !settings.prayerMuted) fadeAudio(document.getElementById("bgmPrayer"), PRAYER_VOL, 1000);
   prayerAudio=document.getElementById("prayerAudio");
   if(prayerAudio){
     prayerAudio.muted=!!settings.prayerMuted;
@@ -1043,11 +1076,13 @@ function startPrayer(){
 }
 function stopPrayer(){
   prayerFallback.forEach(clearTimeout); prayerFallback=[];
+  fadeAudio(document.getElementById("bgmPrayer"),0,600);
   if(prayerAudio){ try{ prayerAudio.pause(); prayerAudio.ontimeupdate=null; prayerAudio.onended=null; prayerAudio.currentTime=0; }catch(_){} }
 }
 document.getElementById("prayerMute").addEventListener("click",()=>{
   settings.prayerMuted=!settings.prayerMuted; save(K.settings,settings);
   if(prayerAudio) prayerAudio.muted=settings.prayerMuted;
+  fadeAudio(document.getElementById("bgmPrayer"), (settings.prayerMuted||!settings.musicEnabled)?0:PRAYER_VOL, 400);
   updatePrayerMute();
 });
 
@@ -1125,7 +1160,7 @@ function startTimer(){
 function finishTimer(complete){
   clearInterval(timerId);
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
-  if(complete){ d.innerHTML="<span class='em'>해냈다. 진짜로.</span>"; s.textContent="닫아도 성공이야."; sfx("enough"); }
+  if(complete){ d.innerHTML="<span class='em'>해냈다. 진짜로.</span>"; s.textContent="닫아도 성공이야."; if(!playComplete()) sfx("enough"); }
   else { d.innerHTML="<span class='em'>이거면 충분해.</span>"; s.textContent="시작한 것만으로 충분해."; }
   document.getElementById("doneMore").classList.remove("collapsed");
   show("done");
@@ -1290,6 +1325,7 @@ sModal.addEventListener("click",e=>{ if(e.target===sModal||e.target.hasAttribute
 function syncSettingsUI(){
   document.getElementById("tgCues").classList.toggle("on",!!settings.cuesEnabled);
   document.getElementById("tgSfx").classList.toggle("on",!!settings.sfxEnabled);
+  document.getElementById("tgMusic").classList.toggle("on",!!settings.musicEnabled);
 }
 document.getElementById("tgCues").addEventListener("click",()=>{
   settings.cuesEnabled=!settings.cuesEnabled; save(K.settings,settings); syncSettingsUI();
@@ -1299,6 +1335,10 @@ document.getElementById("tgCues").addEventListener("click",()=>{
 document.getElementById("tgSfx").addEventListener("click",()=>{
   settings.sfxEnabled=!settings.sfxEnabled; save(K.settings,settings); syncSettingsUI();
   sfx(settings.sfxEnabled?"on":"off");
+});
+document.getElementById("tgMusic").addEventListener("click",()=>{
+  settings.musicEnabled=!settings.musicEnabled; save(K.settings,settings); syncSettingsUI(); sfx(settings.musicEnabled?"on":"off");
+  if(settings.musicEnabled){ bedStarted=false; ensureBed(); } else { stopBed(); }
 });
 
 /* ============================================================ 부팅 */

@@ -1,6 +1,6 @@
 /* 60초 리셋 — service worker (오프라인 캐시)
    bump CACHE 버전을 올리면 새 버전이 배포됨 */
-const CACHE = "reset60-v24";
+const CACHE = "reset60-v25";
 const CORE = [
   "./",
   "./index.html",
@@ -15,7 +15,9 @@ const CORE = [
   "./assets/bg-b.png",
   "./assets/orb.png",
   "./assets/prayer.mp3",
-  // bg.mp4(약 6MB)는 일부러 프리캐시에서 제외 — 첫 설치 부담을 줄이고 fetch 핸들러가 런타임 캐시
+  "./assets/completion_swell.mp3",
+  "./assets/welcome_breath_in.mp3",
+  // bg.mp4(6MB)·bed.mp3·prayer_underscore.mp3는 프리캐시 제외 — fetch 핸들러가 런타임 캐시(음악 켤 때만 받음)
 ];
 
 self.addEventListener("install", (e) => {

@@ -9,5 +9,7 @@ reset_script.js
 .DS_Store
 Thumbs.db
 
-# 원본 한글 파일명 mp3 — ASCII prayer.mp3만 배포
+# 원본 파일명 mp3(공백·한글) — ASCII 재인코딩본만 배포
 assets/주기도문.mp3
+assets/aura_bed v2.mp3
+assets/aura_bed.mp3
