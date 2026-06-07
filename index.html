@@ -242,7 +242,8 @@ body{
 /* Pass2 — 접기 */
 .collapsed{display:none!important;}
 /* Pass4 — ethereal 빛남: 위→아래 동기화 웨이브 + 더 많은 페이지 반영 */
-@keyframes shimmerText{0%{background-position:210% 0;}100%{background-position:-40% 0;}}
+/* 빛남: 사이클 맨 앞(0~32%)에서 같은 속도로 한 번 쓸고 지나간 뒤 나머지는 쉼 → 박스 sheen과 싱크 + 위→아래 순서 유지 */
+@keyframes shimmerText{0%{background-position:90% 0;}32%{background-position:10% 0;}100%{background-position:10% 0;}}
 .mt .t,.wm-num,.wm-rest,.ring-time,
 [data-screen="one"] .title,[data-screen="cpick"] .title{
   background:linear-gradient(100deg,#5f5896 0%,#5f5896 38%,#ffffff 50%,#c6bbf0 60%,#5f5896 72%,#5f5896 100%);
