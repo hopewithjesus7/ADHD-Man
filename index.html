@@ -308,6 +308,15 @@ body{
   background:var(--g-glass) center/cover no-repeat;border:1px solid var(--glass-line);
   font-size:15px;color:var(--ink);box-shadow:var(--shadow-soft);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-align:left;}
 .grat-item .ic{flex:none;font-size:16px;color:#e08fa6;}
+/* iOS/WebKit 폴백: background-clip:text 깜빡임 방지 — 단색+글로우(애니메이션 제거) */
+.flat-text .mt .t,.flat-text .wm-num,.flat-text .wm-rest,.flat-text .ring-time,
+.flat-text [data-screen="one"] .title,.flat-text [data-screen="cpick"] .title,.flat-text [data-screen="lol"] .title,.flat-text [data-screen="gratitude"] .title,
+.flat-text #centerChips .cw,.flat-text #oneChips .ow{
+  background:none!important;-webkit-text-fill-color:#534b82!important;color:#534b82!important;
+  animation:none!important;text-shadow:0 0 10px rgba(255,255,255,.5);}
+.flat-text #centerWord{
+  background:none!important;-webkit-text-fill-color:#534b82!important;color:#534b82!important;
+  animation:wordbreathe 10s ease-in-out infinite!important;text-shadow:0 2px 20px rgba(255,255,255,.85);}
 #centerWord{
   background:linear-gradient(100deg,#5f5896 0%,#5f5896 38%,#ffffff 50%,#c6bbf0 60%,#5f5896 72%,#5f5896 100%);
   background-size:260% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
@@ -678,6 +687,9 @@ const K = { settings:"reset60:settings", log:"reset60:log", lastOpen:"reset60:la
 const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+/* iOS/WebKit는 background-clip:text + 위치 애니메이션에서 글자가 깜빡이며 사라지는 버그가 있어 단색 폴백으로 전환(안드로이드는 그대로 빤짝) */
+const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent||"") || (navigator.platform==="MacIntel" && (navigator.maxTouchPoints||0)>1);
+if(isIOS && document.documentElement) document.documentElement.classList.add("flat-text");
 
 const DEFAULT_SETTINGS = { cuesEnabled:true, sfxEnabled:true, dflt2:true };
 let settings = Object.assign({}, DEFAULT_SETTINGS, load(K.settings, {}));
