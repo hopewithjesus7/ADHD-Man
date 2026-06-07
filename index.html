@@ -257,6 +257,7 @@ body{
 .bridge-mini:active{transform:scale(.9);}
 .bridge-same{justify-content:center;}
 .bridge-input .input{padding:13px 16px;font-size:15px;}
+.bridge-end{font-size:13.5px;padding:11px;margin-top:2px;color:#fff;opacity:.78;}
 /* Pass2 — 접기 */
 .collapsed{display:none!important;}
 /* Pass4 — ethereal 빛남: 위→아래 동기화 웨이브 + 더 많은 페이지 반영 */
@@ -665,6 +666,7 @@ body{
           <button class="softlink bridge-add" id="bridgeAdd"><svg class="ic"><use href="#i-pencil"/></svg>한 줄로 적기</button>
         </div>
         <button class="softlink mini" id="moreNew"><svg class="ic"><use href="#i-sprout"/></svg>다른 작은 거 하나 더</button>
+        <button class="btn-ghost bridge-end" id="bridgeEnd">오늘은 여기까지 — 그것도 좋아</button>
       </div>
     </div>
   </section>
@@ -714,7 +716,6 @@ body{
 <audio id="bgmBed2" preload="none"><source src="assets/bed2.mp3" type="audio/mpeg"></audio>
 <audio id="bgmPrayer" loop preload="none"><source src="assets/prayer_underscore.mp3" type="audio/mpeg"></audio>
 <audio id="sndComplete" preload="auto"><source src="assets/completion_swell.mp3" type="audio/mpeg"></audio>
-<audio id="sndWelcome" preload="auto"><source src="assets/welcome_breath_in.mp3" type="audio/mpeg"></audio>
 
 <script>
 "use strict";
@@ -837,8 +838,6 @@ function ensureBed(){
   bed.play().then(()=>{ if(bedStarted && g===bedGen) fadeAudio(bed,BED_VOL,1400); }).catch(()=>{ bedStarted=false; });
   /* iOS 자동재생 잠금 해제: 두 번째 베드를 사용자 제스처 안에서 무음 prime(나중 핸드오프 거부 방지) */
   const b2=els[1]; if(b2){ try{ const pp=b2.play(); if(pp&&pp.then) pp.then(()=>{ try{ b2.pause(); b2.currentTime=0; b2.volume=0; }catch(_){} }).catch(()=>{}); }catch(_){} }
-  try{ if(typeof sessionStorage!=="undefined" && !sessionStorage.getItem("welcomed")){ sessionStorage.setItem("welcomed","1");
-    const w=document.getElementById("sndWelcome"); if(w){ w.volume=0.6; w.currentTime=0; w.play().catch(()=>{}); } } }catch(_){}
 }
 function stopBed(){ bedStarted=false; bedHanding=false; clearHandTO(); bedGen++; bedEls().forEach(el=>fadeAudio(el,0,800)); fadeAudio(document.getElementById("bgmPrayer"),0,500); }
 function playComplete(){
@@ -1377,8 +1376,10 @@ document.getElementById("lolGo").addEventListener("click",()=>{
   document.getElementById("doneMore").classList.add("collapsed"); show("done");
 });
 /* ---------- 진짜 일 다리(done) — 작은 일 끝낸 뒤, 회피하던 진짜 일을 '첫 한 동작'으로 잇기 ---------- */
+const MAX_REAL=6;   // 보관·관리할 진짜 일 최대 개수
 function loadRealTasks(){ const a=load(K.realTasks,[]); return Array.isArray(a)?a:[]; }
-function saveRealTask(t){ t=(t||"").trim(); if(!t) return; let a=loadRealTasks().filter(x=>x!==t); a.unshift(t); save(K.realTasks,a.slice(0,4)); }
+/* 이미 있는 건 순서 유지(목록이 멋대로 안 흔들리게), 새 것만 맨 앞에 추가 */
+function saveRealTask(t){ t=(t||"").trim(); if(!t) return; let a=loadRealTasks(); if(a.includes(t)) return; a.unshift(t); save(K.realTasks,a.slice(0,MAX_REAL)); }
 function removeRealTask(t){ save(K.realTasks, loadRealTasks().filter(x=>x!==t)); }
 function startReal(t){ t=(t||"").trim(); if(!t) return; oneThing=t; oneIsReal=true; saveRealTask(t); show("timer"); }
 function resetBridgeAdd(){
@@ -1397,7 +1398,7 @@ function openBridgeInput(prefill){
 function renderBridgeChips(){
   const box=document.getElementById("bridgeChips"); if(!box) return 0; box.innerHTML="";
   let a=loadRealTasks(); if(oneIsReal && oneThing) a=a.filter(x=>x!==oneThing);
-  a=a.slice(0,4);
+  a=a.slice(0,MAX_REAL);
   a.forEach(t=>{
     const row=document.createElement("div"); row.className="bridge-row";
     const go=document.createElement("button"); go.className="softlink bridge-chip";
@@ -1436,6 +1437,11 @@ document.getElementById("bridgeInput").addEventListener("keydown",e=>{
   if(!v){ resetBridgeAdd(); return; }
   if(inp._editing){ const old=inp._editing; inp._editing=null; if(v!==old){ removeRealTask(old); saveRealTask(v); } resetBridgeAdd(); renderBridgeChips(); sfx("chip"); }
   else { startReal(v); }
+});
+document.getElementById("bridgeEnd").addEventListener("click",()=>{
+  const s=document.getElementById("doneSub"); if(s) s.textContent="오늘은 여기까지 — 그것도 좋아.";
+  document.getElementById("doneMore").classList.add("collapsed");
+  sfx("enough");
 });
 document.getElementById("moreNew").addEventListener("click",()=>show("one"));
 document.getElementById("moreSame").addEventListener("click",()=>{ if(oneThing) show("timer"); else show("one"); });
