@@ -300,6 +300,13 @@ body{
 [data-screen="lol"] .gate-glow{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);
   width:min(78vw,340px);height:min(78vw,340px);border-radius:50%;pointer-events:none;z-index:0;
   background:var(--g-halo) center/cover no-repeat;filter:blur(10px);opacity:.6;animation:glowpulse 9s ease-in-out infinite;}
+/* Pass7 — 고요(머물기): 안내문 + 단어 빤짝임 */
+.center-instr{font-size:14.5px;color:var(--accent-deep);font-weight:550;letter-spacing:.005em;text-wrap:pretty;min-height:20px;}
+#centerWord{
+  background:linear-gradient(100deg,#5f5896 0%,#5f5896 38%,#ffffff 50%,#c6bbf0 60%,#5f5896 72%,#5f5896 100%);
+  background-size:260% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  text-shadow:0 0 14px rgba(255,255,255,.55);
+  animation:shimmerText var(--shine) linear infinite, wordbreathe 10s ease-in-out infinite;}
 /* Pass5 — 기록 탭: 진주 하늘 / 누적 / 멈춤의 결 / 마일스톤 리본 */
 .pearlsky{width:100%;height:24vh;max-height:210px;border-radius:var(--r);border:1px solid var(--glass-line);
   background:linear-gradient(165deg,#8f86bf,#a39ecb 52%,#b7b0d8);
@@ -531,6 +538,7 @@ body{
         <div class="center-word" id="centerWord"></div>
       </div>
       <div class="center-gloss" id="centerGloss"></div>
+      <div class="center-instr" id="centerInstr">눈을 감고, 60초 동안 이 단어에 가만히 머물러 봐.</div>
       <div class="fade-line">딴 생각이 나면, 이 단어로 살며시 돌아와.</div>
       <button class="btn btn-soft" data-enough="center"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
     </div>
@@ -980,6 +988,8 @@ function startCenter(){
   if(!centerChoice) centerChoice=CENTER_WORDS[Math.floor(Math.random()*CENTER_WORDS.length)];
   document.getElementById("centerWord").textContent=centerChoice.w;
   document.getElementById("centerGloss").textContent=centerChoice.g;
+  const instr=document.getElementById("centerInstr");
+  if(instr){ instr.style.transition="none"; instr.style.opacity="1"; void instr.offsetWidth; instr.style.transition="opacity 1.4s ease 4.5s"; instr.style.opacity="0"; }
   cue();
 }
 document.getElementById("centerReshuffle").addEventListener("click",()=>fadeSwap(document.getElementById("centerChips"),renderCenterChips));
