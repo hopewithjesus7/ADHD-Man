@@ -106,12 +106,13 @@ body{
 /* ---------- layout ---------- */
 #app{position:relative;z-index:1;height:100dvh;width:100%;display:flex;align-items:center;justify-content:center;
   padding:max(22px,env(safe-area-inset-top)) 22px max(26px,env(safe-area-inset-bottom));}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:max(54px,env(safe-area-inset-top)) 26px max(40px,env(safe-area-inset-bottom));
   gap:22px;text-align:center;opacity:0;transform:translateY(16px) scale(.99);
   pointer-events:none;transition:opacity .7s var(--ease),transform .7s var(--ease);}
 .screen.active{opacity:1;transform:none;pointer-events:auto;}
-.wrap{width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+.wrap{width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;gap:20px;margin-top:auto;margin-bottom:auto;}
 
 /* ---------- typography ---------- */
 .title{font-size:clamp(25px,6.8vw,32px);font-weight:600;line-height:1.5;letter-spacing:-.01em;
@@ -274,11 +275,13 @@ body{
 #centerChips .chip:nth-child(2) .cw{animation-delay:calc(var(--shine)*0.2 + var(--shine-sync));}
 #centerChips .chip:nth-child(3) .cw{animation-delay:calc(var(--shine)*0.4 + var(--shine-sync));}
 /* Pass5 — 기록 탭: 진주 하늘 / 누적 / 멈춤의 결 / 마일스톤 리본 */
-.pearlsky{width:100%;height:30vh;max-height:240px;border-radius:var(--r);border:1px solid var(--glass-line);
-  background:linear-gradient(165deg,#c4bce6,#cdd0ee 55%,#d7cfe8);
-  box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.45);display:block;}
+.pearlsky{width:100%;height:24vh;max-height:210px;border-radius:var(--r);border:1px solid var(--glass-line);
+  background:linear-gradient(165deg,#8f86bf,#a39ecb 52%,#b7b0d8);
+  box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.35);display:block;}
 .stat-sub{font-size:13px;color:var(--ink-soft);margin-top:8px;}
-.weave{width:100%;display:flex;flex-direction:column;gap:8px;}
+.weave{width:100%;display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:var(--r);
+  border:1px solid var(--glass-line);background:var(--g-glass) center/cover no-repeat;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:var(--shadow-soft);}
 .weave-note{font-size:13px;color:var(--ink-soft);text-align:center;line-height:1.6;margin-bottom:2px;text-wrap:pretty;}
 .weave-row{display:flex;align-items:center;gap:10px;}
 .weave-row .wl{flex:none;width:38px;font-size:12.5px;color:var(--ink-soft);font-weight:550;}
@@ -348,7 +351,7 @@ body{
 .stat-label{font-size:13.5px;color:var(--ink-soft);font-weight:500;letter-spacing:.01em;}
 .stat-num{font-family:var(--serif);font-size:54px;font-weight:600;color:var(--accent-deep);line-height:1.1;margin-top:6px;}
 .log-head{align-self:flex-start;margin-left:6px;font-size:13.5px;color:var(--ink-soft);font-weight:550;}
-.log-list{width:100%;display:flex;flex-direction:column;gap:10px;max-height:32vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.log-list{width:100%;display:flex;flex-direction:column;gap:10px;}
 .log-item{background:var(--g-glass) center/cover no-repeat;border:1px solid var(--glass-line);border-radius:18px;padding:14px 18px;
   font-size:15px;display:flex;justify-content:space-between;gap:12px;align-items:center;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
@@ -1048,9 +1051,9 @@ function drawPearlSky(log, prevSeen){
       const col=PEARL_COL[type]||"255,255,255";
       const fresh=i>=prevSeen;
       const br=reduce?1:(0.94+0.06*Math.sin(time*0.6+i*0.7));
-      let al=(0.45+0.4*(i/Math.max(n,1)))*br;
-      let rr=1.5+1.1*(i/Math.max(n,1));
-      if(fresh){ al=Math.min(1,al+0.35); rr+=0.9; }
+      let al=(0.7+0.25*(i/Math.max(n,1)))*br;
+      let rr=2.3+1.5*(i/Math.max(n,1));
+      if(fresh){ al=Math.min(1,al+0.25); rr+=1.1; }
       const grad=ctx.createRadialGradient(x,y,0,x,y,rr*3.2);
       grad.addColorStop(0,"rgba(255,255,255,"+al.toFixed(3)+")");
       grad.addColorStop(.45,"rgba("+col+","+(al*0.55).toFixed(3)+")");
@@ -1073,7 +1076,7 @@ function renderWeave(log){
   let html = total ? "<div class='weave-note'>"+(NOTE[top]||"")+" 어느 게 많고 적고는 중요하지 않아. 다 너야.</div>" : "";
   order.forEach(t=>{
     const c=cnt[t], col=PEARL_COL[t]; let dots="";
-    if(c===0){ dots="<span class='dot e'></span><span class='dot e'></span><span class='dot e'></span><span class='emptynote'>아직 비어 있는 하늘 — 언제든 천천히</span>"; }
+    if(c===0){ dots="<span class='dot e'></span><span class='dot e'></span><span class='dot e'></span>"; }
     else { const sh=Math.min(c,24); for(let i=0;i<sh;i++) dots+="<span class='dot' style='background:rgba("+col+",.9)'></span>"; if(c>24) dots+="<span class='more'>+"+(c-24)+"</span>"; }
     html+="<div class='weave-row"+(c===0?" empty":"")+"'><span class='wl'>"+LOG_LABEL[t]+"</span><span class='dots'>"+dots+"</span></div>";
   });
