@@ -44,6 +44,7 @@
   --serif:"Playfair Display",Georgia,"Times New Roman",serif;
   --serif-ko:"Nanum Myeongjo",Georgia,serif;  /* 고급 한글 명조 디스플레이용 — 바꾸려면 이 한 줄만 (예: "Gowun Batang", "Noto Serif KR") */
   --shine:14s;  /* ethereal 빛남 한 사이클 길이 — 클수록 더 천천히 빤짝임 (예: 18s = 더 느리게) */
+  --shine-sync:0.5s;  /* 텍스트가 박스보다 살짝 일찍 빤짝이는 것 보정(텍스트 지연). 어긋나면 이 값만 조절(0~1s) */
   --g-iris:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='ir' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f7cbe6'/><stop offset='.3' stop-color='%23cdc4f2'/><stop offset='.55' stop-color='%23bfe0f1'/><stop offset='.8' stop-color='%23d2eede'/><stop offset='1' stop-color='%23ecccef'/></linearGradient></defs><rect width='120' height='120' fill='url(%23ir)'/></svg>");
   --g-sheen:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' preserveAspectRatio='none'><defs><linearGradient id='sh' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='%23ffe9f6' stop-opacity='0'/><stop offset='.4' stop-color='%23ffe9f6' stop-opacity='.6'/><stop offset='.6' stop-color='%23e6f0ff' stop-opacity='.6'/><stop offset='1' stop-color='%23e6f0ff' stop-opacity='0'/></linearGradient></defs><rect width='120' height='120' fill='url(%23sh)'/></svg>");
   --g-holo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' preserveAspectRatio='none'><defs><linearGradient id='ho' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ffd9ec'/><stop offset='.25' stop-color='%23d6c6f6'/><stop offset='.5' stop-color='%23c2e6f2'/><stop offset='.75' stop-color='%23d9f0df'/><stop offset='1' stop-color='%23ffe6cf'/></linearGradient></defs><rect width='200' height='200' fill='url(%23ho)'/></svg>");
@@ -245,18 +246,33 @@ body{
 /* 빛남: 사이클 맨 앞(0~32%)에서 같은 속도로 한 번 쓸고 지나간 뒤 나머지는 쉼 → 박스 sheen과 싱크 + 위→아래 순서 유지 */
 @keyframes shimmerText{0%{background-position:90% 0;}32%{background-position:10% 0;}100%{background-position:10% 0;}}
 .mt .t,.wm-num,.wm-rest,.ring-time,
-[data-screen="one"] .title,[data-screen="cpick"] .title{
+[data-screen="one"] .title,[data-screen="cpick"] .title,#centerChips .cw{
   background:linear-gradient(100deg,#5f5896 0%,#5f5896 38%,#ffffff 50%,#c6bbf0 60%,#5f5896 72%,#5f5896 100%);
   background-size:260% 100%;-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;color:transparent;
   text-shadow:0 0 9px rgba(255,255,255,.42);animation:shimmerText var(--shine) linear infinite;}
 .mt .t{font-weight:700;}
 /* 홈 웨이브: 말씀 0 → 기도 → 고요 → 호흡 → 60초 리셋 → 반복 (속도는 :root --shine 한 줄로) */
-.mode:nth-child(1) .t{animation-delay:0s;}
-.mode:nth-child(2) .t{animation-delay:calc(var(--shine)*0.2);}
-.mode:nth-child(3) .t{animation-delay:calc(var(--shine)*0.4);}
-.mode:nth-child(4) .t{animation-delay:calc(var(--shine)*0.6);}
-.wm-num,.wm-rest{animation-delay:calc(var(--shine)*0.8);text-shadow:0 0 14px rgba(255,255,255,.5);}
+.mode:nth-child(1) .t{animation-delay:var(--shine-sync);}
+.mode:nth-child(2) .t{animation-delay:calc(var(--shine)*0.2 + var(--shine-sync));}
+.mode:nth-child(3) .t{animation-delay:calc(var(--shine)*0.4 + var(--shine-sync));}
+.mode:nth-child(4) .t{animation-delay:calc(var(--shine)*0.6 + var(--shine-sync));}
+.wm-num,.wm-rest{animation-delay:calc(var(--shine)*0.8 + var(--shine-sync));text-shadow:0 0 14px rgba(255,255,255,.5);}
+/* Pass5 — 고요(cpick) 칩도 랜딩처럼: iris 테두리 + sheen + 단어 shimmer (3개 웨이브) */
+#centerChips .chip::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;opacity:.8;pointer-events:none;z-index:0;
+  background:var(--g-iris) center/cover no-repeat;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;}
+#centerChips .chip::after{content:"";position:absolute;top:0;left:-72%;width:56%;height:100%;pointer-events:none;z-index:1;
+  background:var(--g-sheen) center/cover no-repeat;transform:skewX(-16deg);mix-blend-mode:screen;opacity:0;
+  animation:sheen var(--shine) ease-in-out infinite;}
+#centerChips .chip>*{position:relative;z-index:2;}
+#centerChips .chip:nth-child(1)::after{animation-delay:0s;}
+#centerChips .chip:nth-child(2)::after{animation-delay:calc(var(--shine)*0.2);}
+#centerChips .chip:nth-child(3)::after{animation-delay:calc(var(--shine)*0.4);}
+#centerChips .chip:nth-child(1) .cw{animation-delay:var(--shine-sync);}
+#centerChips .chip:nth-child(2) .cw{animation-delay:calc(var(--shine)*0.2 + var(--shine-sync));}
+#centerChips .chip:nth-child(3) .cw{animation-delay:calc(var(--shine)*0.4 + var(--shine-sync));}
 /* Pass3 — 기도 영문 보조 */
 .prayer-line .pk{display:block;}
 .prayer-line .pe{display:block;font-family:var(--serif);font-style:italic;font-weight:500;font-size:14.5px;letter-spacing:.01em;color:var(--ink-soft);margin-top:11px;opacity:.82;}
@@ -609,7 +625,7 @@ function chime(freq){
 function cue(opts){
   if(!settings.cuesEnabled) return;
   opts=opts||{};
-  if(navigator.vibrate){ try{ navigator.vibrate(opts.long?[18,40,18]:14); }catch(_){} }
+  if(navigator.vibrate){ try{ navigator.vibrate(opts.long?[30,55,30]:40); }catch(_){} }
   chime(opts.freq);
 }
 /* ---------- 셔플/구절 교체 부드러운 페이드 ---------- */
