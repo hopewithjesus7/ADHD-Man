@@ -1,6 +1,6 @@
 /* 60초 리셋 — service worker (오프라인 캐시)
    bump CACHE 버전을 올리면 새 버전이 배포됨 */
-const CACHE = "reset60-v28";
+const CACHE = "reset60-v29";
 const CORE = [
   "./",
   "./index.html",
@@ -16,6 +16,10 @@ const CORE = [
   "./assets/orb.png",
   "./assets/prayer.mp3",
   "./assets/completion_swell.mp3",
+  "./assets/session_end.mp3",
+  "./assets/break_in.mp3",
+  "./assets/break_out.mp3",
+  "./assets/cute.mp3",
   // bg.mp4(6MB)·bed1.mp3·bed2.mp3·prayer_underscore.mp3는 프리캐시 제외 — fetch 핸들러가 런타임 캐시(음악 켤 때만 받음)
 ];
 

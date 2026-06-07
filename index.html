@@ -727,6 +727,10 @@ body{
 <audio id="bgmBed2" preload="none"><source src="assets/bed2.mp3" type="audio/mpeg"></audio>
 <audio id="bgmPrayer" loop preload="none"><source src="assets/prayer_underscore.mp3" type="audio/mpeg"></audio>
 <audio id="sndComplete" preload="auto"><source src="assets/completion_swell.mp3" type="audio/mpeg"></audio>
+<audio id="sndSessionEnd" preload="auto"><source src="assets/session_end.mp3" type="audio/mpeg"></audio>
+<audio id="sndBreakIn" preload="auto"><source src="assets/break_in.mp3" type="audio/mpeg"></audio>
+<audio id="sndBreakOut" preload="auto"><source src="assets/break_out.mp3" type="audio/mpeg"></audio>
+<audio id="sndCute" preload="auto"><source src="assets/cute.mp3" type="audio/mpeg"></audio>
 
 <script>
 "use strict";
@@ -853,11 +857,13 @@ function ensureBed(){
 function stopBed(){ bedStarted=false; bedHanding=false; clearHandTO(); bedGen++; bedEls().forEach(el=>fadeAudio(el,0,800)); fadeAudio(document.getElementById("bgmPrayer"),0,500); }
 /* 호흡 중엔 베드를 낮춰(덕킹) 들이쉬고·내쉬고 소리가 묻히지 않게 */
 function duckBed(on){ bedTargetVol = on ? BED_DUCK : BED_VOL; if(bedStarted){ const a=bedEls()[bedIdx]; if(a && !a.paused) fadeAudio(a, bedTargetVol, 500); } }
-function playComplete(){
+/* 녹음된 원샷(완료·마무리·쉼·축하) — '잔잔한 음악'이 켜져 있을 때만. 실패하면 호출부가 합성음으로 폴백 */
+function playSnd(id, vol){
   if(!settings.musicEnabled) return false;
-  const s=document.getElementById("sndComplete"); if(!s) return false;
-  try{ s.volume=0.78; s.currentTime=0; s.play().catch(()=>{}); return true; }catch(_){ return false; }
+  const s=document.getElementById(id); if(!s) return false;
+  try{ s.volume=(vol==null?0.8:vol); s.currentTime=0; s.play().catch(()=>{}); return true; }catch(_){ return false; }
 }
+function playComplete(){ return playSnd("sndComplete",0.78); }
 
 /* ============================================================
    ✦ Sparkle field — 흰 반짝임 (canvas)
@@ -1248,7 +1254,7 @@ function finishTimer(complete){
   if(isBreak){
     isBreak=false; breakJustDone=true;
     d.innerHTML="<span class='em'>잘 쉬었어.</span>"; s.textContent="천천히, 다시 이어가자.";
-    if(!playComplete()) sfx("enough");
+    if(!playSnd("sndBreakOut",0.82)) sfx("enough");
     renderDoneBridge(); document.getElementById("doneMore").classList.remove("collapsed"); show("done");
     return;
   }
@@ -1275,7 +1281,7 @@ const MILE_MSG={10:"진주 열 개. 시작도 못 했다고 느꼈을 때, 이�
 function checkMilestone(total){
   const seen=load(K.mileSeen,0);
   const reached=MILE.filter(m=>total>=m); const top=reached[reached.length-1]||0;
-  if(top>seen){ save(K.mileSeen,top); showRibbon(MILE_MSG[top]); sfx("mile"); }
+  if(top>seen){ save(K.mileSeen,top); showRibbon(MILE_MSG[top]); if(!playSnd("sndCute",0.8)) sfx("mile"); }
 }
 let ribbonTimer=null;
 function showRibbon(msg){
@@ -1409,7 +1415,7 @@ function saveRealTask(t){ t=(t||"").trim(); if(!t) return; let a=loadRealTasks()
 function removeRealTask(t){ save(K.realTasks, loadRealTasks().filter(x=>x!==t)); }
 function startReal(t){ t=(t||"").trim(); if(!t) return; oneThing=t; oneIsReal=true; isBreak=false; timerTotal=180; saveRealTask(t); show("timer"); }
 function startRealFor(min){ if(!oneThing) return; oneIsReal=true; isBreak=false; timerTotal=Math.max(60,min*60); show("timer"); }
-function startBreak(min){ isBreak=true; timerTotal=Math.max(60,(min||1)*60); show("timer"); }
+function startBreak(min){ isBreak=true; timerTotal=Math.max(60,(min||1)*60); playSnd("sndBreakIn",0.8); show("timer"); }
 function renderDur(){
   const box=document.getElementById("bridgeDur"); if(!box) return; box.innerHTML="";
   const suggest=FOCUS_PICK.find(m=>m>lastFocusMin)||FOCUS_PICK[FOCUS_PICK.length-1];
@@ -1497,7 +1503,7 @@ document.getElementById("bridgeRest").addEventListener("click",()=>{ sfx("tap");
 document.getElementById("bridgeEnd").addEventListener("click",()=>{
   const s=document.getElementById("doneSub"); if(s) s.textContent="오늘은 여기까지 — 그것도 좋아.";
   document.getElementById("doneMore").classList.add("collapsed");
-  if(!playComplete()) sfx("enough");
+  if(!playSnd("sndSessionEnd",0.85)) sfx("enough");
 });
 document.getElementById("moreNew").addEventListener("click",()=>show("one"));
 document.getElementById("navLog").addEventListener("click",()=>show("log"));
