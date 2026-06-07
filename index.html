@@ -664,7 +664,7 @@ body{
     <button class="close-x" data-close>닫기</button>
     <h2>설정</h2>
     <div class="row">
-      <div><div class="label">눈 감고 쓸 때 신호</div><div class="desc">호흡·기도 흐름을 부드러운 진동·소리로. 알람 아냐.</div></div>
+      <div><div class="label">눈 감고 쓸 때 신호</div><div class="desc">호흡·기도 중 부드러운 진동으로 흐름을 알려줘. 알람 아냐.</div></div>
       <button class="toggle" id="tgCues"></button>
     </div>
     <div class="row">
@@ -717,7 +717,6 @@ function cue(opts){
   if(!settings.cuesEnabled) return;
   opts=opts||{};
   if(navigator.vibrate){ try{ navigator.vibrate(opts.long?[30,55,30]:40); }catch(_){} }
-  chime(opts.freq);
 }
 /* ---------- 버튼 사운드 이펙트 (펄/유리 톤, 기본 ON, audioCtx 재사용) ---------- */
 function tone(ctx,t,o){
