@@ -304,6 +304,10 @@ body{
   background:var(--g-halo) center/cover no-repeat;filter:blur(10px);opacity:.6;animation:glowpulse 9s ease-in-out infinite;}
 /* Pass7 — 고요(머물기): 안내문 + 단어 빤짝임 */
 .center-instr{font-size:14.5px;color:var(--accent-deep);font-weight:550;letter-spacing:.005em;text-wrap:pretty;min-height:20px;}
+.grat-item{display:flex;align-items:center;gap:9px;width:100%;padding:11px 16px;border-radius:16px;
+  background:var(--g-glass) center/cover no-repeat;border:1px solid var(--glass-line);
+  font-size:15px;color:var(--ink);box-shadow:var(--shadow-soft);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-align:left;}
+.grat-item .ic{flex:none;font-size:16px;color:#e08fa6;}
 #centerWord{
   background:linear-gradient(100deg,#5f5896 0%,#5f5896 38%,#ffffff 50%,#c6bbf0 60%,#5f5896 72%,#5f5896 100%);
   background-size:260% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
@@ -489,11 +493,11 @@ body{
   <!-- GRATITUDE -->
   <section class="screen" data-screen="gratitude">
     <div class="wrap">
-      <div class="title">오늘, <span class="em">감사한 것 하나</span>.</div>
+      <div class="title">오늘, <span class="em">감사한 것</span>.</div>
       <div class="lead" id="gratPrompt"></div>
-      <button class="softlink" id="gratWrite">하나 적어둘래 (선택)</button>
-      <input class="input collapsed" id="gratInput" placeholder="예: 따뜻한 커피 한 잔, 무사히 지난 하루" />
-      <button class="btn btn-soft" data-enough="gratitude"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
+      <div class="chips" id="gratList"></div>
+      <input class="input" id="gratInput" placeholder="감사한 것 하나… (엔터로 추가)" />
+      <button class="btn btn-soft" id="gratDone"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
     </div>
   </section>
 
@@ -651,18 +655,6 @@ body{
     <button class="close-x" data-close>닫기</button>
     <h2>설정</h2>
     <div class="row">
-      <div><div class="label">하루 넛지</div><div class="desc">조용한 권유 한 번. 채근 아님.</div></div>
-      <button class="toggle" id="tgNudge"></button>
-    </div>
-    <div class="row" id="nudgeFreqRow">
-      <div><div class="label">하루 몇 번</div><div class="desc">언제든 줄일 수 있어.</div></div>
-      <div class="seg" id="nudgeFreq"><button data-n="1">1번</button><button data-n="2">2번</button><button data-n="3">3번</button></div>
-    </div>
-    <div class="row" id="nudgeTimeRow">
-      <div><div class="label">첫 시간</div><div class="desc">이때부터 고르게 나눠서.</div></div>
-      <input class="time-in" type="time" id="nudgeTime" value="10:00" />
-    </div>
-    <div class="row">
       <div><div class="label">눈 감고 쓸 때 신호</div><div class="desc">호흡·기도 흐름을 부드러운 진동·소리로. 알람 아냐.</div></div>
       <button class="toggle" id="tgCues"></button>
     </div>
@@ -670,7 +662,7 @@ body{
       <div><div class="label">탭 소리</div><div class="desc">유리 진주처럼 맑고 작은 소리. 알람 아냐 — 누를 때만 살짝.</div></div>
       <button class="toggle" id="tgSfx"></button>
     </div>
-    <div class="hint" id="nudgeHint"></div>
+    <div class="hint">폰 홈 화면에 추가해두면 오프라인에서도, 더 빠르게 열려.</div>
   </div>
 </div>
 
@@ -687,7 +679,7 @@ const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 
-const DEFAULT_SETTINGS = { nudgeEnabled:false, nudgeCount:2, nudgeTime:"10:00", cuesEnabled:true, sfxEnabled:true, dflt2:true };
+const DEFAULT_SETTINGS = { cuesEnabled:true, sfxEnabled:true, dflt2:true };
 let settings = Object.assign({}, DEFAULT_SETTINGS, load(K.settings, {}));
 /* 신호·탭소리를 기본 ON으로 — 이전에 설정이 저장된 사용자도 한 번만 적용(이후 직접 끄면 그 선택 유지) */
 if(!settings.dflt2){ settings.cuesEnabled=true; settings.sfxEnabled=true; settings.dflt2=true; save(K.settings,settings); }
@@ -934,7 +926,7 @@ function ripple(e){
   b.appendChild(s); setTimeout(()=>s.remove(),750);
   if(navigator.vibrate) try{navigator.vibrate(8);}catch(_){}
   const go=b.dataset.go;
-  sfx( (go && SFX[go]) ? go : (b.dataset.enough || b.id==="timerStop") ? "enough" : b.classList.contains("chip") ? "chip" : "tap" );
+  sfx( (go && SFX[go]) ? go : (b.dataset.enough || b.id==="timerStop" || b.id==="gratDone") ? "enough" : b.classList.contains("chip") ? "chip" : "tap" );
 }
 document.querySelectorAll(".btn,.chip").forEach(b=>b.addEventListener("pointerdown",ripple));
 document.querySelectorAll(".icon-btn").forEach(b=>b.addEventListener("pointerdown",()=>sfx("tap")));
@@ -959,15 +951,30 @@ function stopBreath(){ if(breathTimer){clearInterval(breathTimer);breathTimer=nu
 
 /* ============================================================ 감사 */
 const GRAT_PROMPTS=["작은 것이어도 괜찮아 — 따뜻한 물 한 잔, 햇살, 무사히 지난 하루.","떠오른 그 하나를, 잠깐 마음에 담아 봐.","누군가의 한마디, 숨 쉬는 지금, 그분의 돌보심.","당연하게 지나친 것 중 하나를 떠올려 봐.","고마운 마음, 그분께 한마디로 전해도 좋아."];
-function startGratitude(){
-  document.getElementById("gratPrompt").textContent=GRAT_PROMPTS[Math.floor(Math.random()*GRAT_PROMPTS.length)];
-  const inp=document.getElementById("gratInput"), tog=document.getElementById("gratWrite");
-  if(inp){ inp.value=""; inp.classList.add("collapsed"); } if(tog){ tog.style.display=""; }
+let gratItems=[];
+function renderGratList(){
+  const box=document.getElementById("gratList"); if(!box) return; box.innerHTML="";
+  gratItems.forEach(t=>{ const d=document.createElement("div"); d.className="grat-item";
+    d.innerHTML="<svg class='ic'><use href='#i-heart'/></svg>"; const s=document.createElement("span"); s.textContent=t; d.appendChild(s); box.appendChild(d); });
 }
-document.getElementById("gratWrite").addEventListener("click",()=>{
-  const inp=document.getElementById("gratInput"), tog=document.getElementById("gratWrite");
-  inp.classList.toggle("collapsed");
-  if(!inp.classList.contains("collapsed")){ tog.style.display="none"; try{ inp.focus(); }catch(_){} }
+function startGratitude(){
+  gratItems=[];
+  document.getElementById("gratPrompt").textContent=GRAT_PROMPTS[Math.floor(Math.random()*GRAT_PROMPTS.length)];
+  const inp=document.getElementById("gratInput"); if(inp) inp.value="";
+  renderGratList();
+}
+function addGrat(){
+  const inp=document.getElementById("gratInput"); if(!inp) return;
+  const v=inp.value.trim(); if(!v) return;
+  gratItems.push(v); inp.value=""; renderGratList(); sfx("chip");
+  document.getElementById("gratPrompt").textContent="하나 더 적어도 좋아 — 아니면 ‘이거면 충분해’.";
+  try{ inp.focus(); }catch(_){}
+}
+document.getElementById("gratInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); addGrat(); } });
+document.getElementById("gratDone").addEventListener("click",()=>{
+  const inp=document.getElementById("gratInput"); if(inp && inp.value.trim()){ gratItems.push(inp.value.trim()); inp.value=""; }
+  if(gratItems.length) gratItems.forEach(t=>logAdd("gratitude",t)); else logAdd("gratitude");
+  gratItems=[]; show("enough");
 });
 
 /* ============================================================ 기도 */
@@ -1204,11 +1211,7 @@ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=
   show(t);
 }));
 function lolEnter(){ lolFlag=true; show("breath"); }
-document.querySelectorAll("[data-enough]").forEach(b=>b.addEventListener("click",()=>{
-  const type=b.dataset.enough; let thing;
-  if(type==="gratitude"){ const v=document.getElementById("gratInput"); if(v && !v.classList.contains("collapsed") && v.value.trim()) thing=v.value.trim(); }
-  logAdd(type, thing); show("enough");
-}));
+document.querySelectorAll("[data-enough]").forEach(b=>b.addEventListener("click",()=>{ logAdd(b.dataset.enough); show("enough"); }));
 function finishDone(){
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
   d.innerHTML="<span class='em'>그것도 좋아.</span>"; s.textContent="닫아도 성공이야.";
@@ -1241,29 +1244,10 @@ document.getElementById("navHome").addEventListener("click",()=>{
 const sModal=document.getElementById("settingsModal");
 function openSettings(){ syncSettingsUI(); sModal.classList.add("open"); }
 sModal.addEventListener("click",e=>{ if(e.target===sModal||e.target.hasAttribute("data-close")) sModal.classList.remove("open"); });
-const tgNudge=document.getElementById("tgNudge"), freqSeg=document.getElementById("nudgeFreq"), nudgeTime=document.getElementById("nudgeTime");
 function syncSettingsUI(){
-  tgNudge.classList.toggle("on",!!settings.nudgeEnabled);
   document.getElementById("tgCues").classList.toggle("on",!!settings.cuesEnabled);
   document.getElementById("tgSfx").classList.toggle("on",!!settings.sfxEnabled);
-  [...freqSeg.children].forEach(b=>b.classList.toggle("sel",+b.dataset.n===settings.nudgeCount));
-  nudgeTime.value=settings.nudgeTime||"10:00";
-  document.getElementById("nudgeFreqRow").style.opacity=settings.nudgeEnabled?1:.45;
-  document.getElementById("nudgeTimeRow").style.opacity=settings.nudgeEnabled?1:.45;
-  document.getElementById("nudgeHint").textContent= settings.nudgeEnabled
-    ? "앱이 열려 있을 때 살짝 알려줘. 완전히 닫혀 있으면 못 올 수 있어 — 꼭 챙기고 싶으면 폰 알람도 같이 써."
-    : "넛지는 꺼져 있어. 필요할 때만 켜.";
 }
-tgNudge.addEventListener("click",()=>{
-  settings.nudgeEnabled=!settings.nudgeEnabled; save(K.settings,settings); syncSettingsUI(); sfx(settings.nudgeEnabled?"on":"off");
-  if(settings.nudgeEnabled && "Notification" in window){
-    if(Notification.permission==="default"){ Notification.requestPermission().then(p=>{ if(p==="granted") notify("넛지 켜졌어 — 이렇게 살짝 들를게."); scheduleNudges(); }); }
-    else if(Notification.permission==="granted"){ notify("넛지 켜졌어 — 이렇게 살짝 들를게."); }
-  }
-  scheduleNudges();
-});
-freqSeg.addEventListener("click",e=>{ if(e.target.dataset.n){ settings.nudgeCount=+e.target.dataset.n; save(K.settings,settings); syncSettingsUI(); scheduleNudges(); }});
-nudgeTime.addEventListener("change",()=>{ settings.nudgeTime=nudgeTime.value; save(K.settings,settings); scheduleNudges(); });
 document.getElementById("tgCues").addEventListener("click",()=>{
   settings.cuesEnabled=!settings.cuesEnabled; save(K.settings,settings); syncSettingsUI();
   sfx(settings.cuesEnabled?"on":"off");
@@ -1274,33 +1258,10 @@ document.getElementById("tgSfx").addEventListener("click",()=>{
   sfx(settings.sfxEnabled?"on":"off");
 });
 
-function notify(body){
-  if(!("Notification" in window) || Notification.permission!=="granted") return;
-  if(navigator.serviceWorker && navigator.serviceWorker.ready){
-    navigator.serviceWorker.ready.then(reg=>{ try{ reg.showNotification("60초 리셋",{body,icon:"icon-192.png",badge:"icon-192.png",tag:"reset60"}); }catch(_){ try{ new Notification("60초 리셋",{body}); }catch(__){} } }).catch(()=>{});
-  } else { try{ new Notification("60초 리셋",{body}); }catch(__){} }
-}
-let nudgeTimers=[];
-const NUDGE_MSGS=["60초만 멈춰 볼까?","숨 한 번 쉬고 가자.","말씀 한 구절 어때?","이거면 충분해 — 잠깐 들러."];
-function clearNudges(){ nudgeTimers.forEach(t=>clearTimeout(t)); nudgeTimers=[]; }
-function scheduleNudges(){
-  clearNudges();
-  if(!settings.nudgeEnabled) return;
-  if(!("Notification" in window) || Notification.permission!=="granted") return;
-  const [h,m]=(settings.nudgeTime||"10:00").split(":").map(Number), spanH=12, now=new Date();
-  for(let i=0;i<settings.nudgeCount;i++){
-    const t=new Date(); t.setHours(h,m,0,0);
-    t.setMinutes(t.getMinutes()+Math.round((spanH*60/Math.max(settings.nudgeCount,1))*i));
-    let delay=t.getTime()-now.getTime(); if(delay<0) delay+=86400000;
-    if(delay<25*3600*1000){ nudgeTimers.push(setTimeout(()=>notify(NUDGE_MSGS[i%NUDGE_MSGS.length]),delay)); }
-  }
-}
-
 /* ============================================================ 부팅 */
 refreshGreeting();
 show("home");
 save(K.lastOpen,new Date().toISOString());
-scheduleNudges();
 
 /* 배경 영상: 한 영상을 끕김없이 재생하다가 끝→처음 이음새에서만 0.5초 크로스페이드.
    재생 불가 환경(미리보기)에선 둘 다 투명 유지 → 애니메이션 이미지 폴백 */
