@@ -273,6 +273,28 @@ body{
 #centerChips .chip:nth-child(1) .cw{animation-delay:var(--shine-sync);}
 #centerChips .chip:nth-child(2) .cw{animation-delay:calc(var(--shine)*0.2 + var(--shine-sync));}
 #centerChips .chip:nth-child(3) .cw{animation-delay:calc(var(--shine)*0.4 + var(--shine-sync));}
+/* Pass5 — 기록 탭: 진주 하늘 / 누적 / 멈춤의 결 / 마일스톤 리본 */
+.pearlsky{width:100%;height:30vh;max-height:240px;border-radius:var(--r);border:1px solid var(--glass-line);
+  background:linear-gradient(165deg,#c4bce6,#cdd0ee 55%,#d7cfe8);
+  box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.45);display:block;}
+.stat-sub{font-size:13px;color:var(--ink-soft);margin-top:8px;}
+.weave{width:100%;display:flex;flex-direction:column;gap:8px;}
+.weave-note{font-size:13px;color:var(--ink-soft);text-align:center;line-height:1.6;margin-bottom:2px;text-wrap:pretty;}
+.weave-row{display:flex;align-items:center;gap:10px;}
+.weave-row .wl{flex:none;width:38px;font-size:12.5px;color:var(--ink-soft);font-weight:550;}
+.weave-row .dots{display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
+.weave-row .dot{width:7px;height:7px;border-radius:50%;box-shadow:0 0 5px rgba(255,255,255,.55);}
+.weave-row .dot.e{background:transparent!important;border:1px dashed var(--ink-faint);box-shadow:none;}
+.weave-row .more{font-size:11px;color:var(--ink-faint);margin-left:2px;}
+.weave-row .emptynote{font-size:11.5px;color:var(--ink-faint);margin-left:6px;}
+.weave-row.empty .wl{color:var(--ink-faint);}
+.ribbon{position:fixed;left:50%;top:max(20px,env(safe-area-inset-top));transform:translate(-50%,-16px);
+  z-index:60;max-width:88%;padding:13px 22px;border-radius:18px;text-align:center;
+  background:var(--g-strong) center/cover no-repeat;border:1px solid var(--glass-line);
+  box-shadow:var(--shadow),0 0 30px -6px rgba(214,200,244,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  font-size:14px;font-weight:550;color:var(--ink);line-height:1.5;text-wrap:pretty;
+  opacity:0;pointer-events:none;transition:opacity .55s var(--ease),transform .55s var(--ease);}
+.ribbon.show{opacity:1;transform:translate(-50%,0);}
 /* Pass3 — 기도 영문 보조 */
 .prayer-line .pk{display:block;}
 .prayer-line .pe{display:block;font-family:var(--serif);font-style:italic;font-weight:500;font-size:14.5px;letter-spacing:.01em;color:var(--ink-soft);margin-top:11px;opacity:.82;}
@@ -554,10 +576,13 @@ body{
   <!-- LOG -->
   <section class="screen" data-screen="log">
     <div class="wrap">
+      <canvas class="pearlsky" id="pearlSky"></canvas>
       <div class="stat">
-        <div class="stat-label">이번 주에 멈춰서 숨 쉰 횟수</div>
-        <div class="stat-num" id="weekCount">0</div>
+        <div class="stat-label">지금까지 하늘에 올린 진주</div>
+        <div class="stat-num" id="totalCount">0</div>
+        <div class="stat-sub" id="totalSub"></div>
       </div>
+      <div class="weave" id="pearlWeave"></div>
       <div class="log-head">오늘 건드린 것</div>
       <div class="log-list" id="logList"></div>
       <button class="softlink" data-go="home">처음으로</button>
@@ -587,9 +612,15 @@ body{
       <div><div class="label">눈 감고 쓸 때 신호</div><div class="desc">호흡·기도 흐름을 부드러운 진동·소리로. 알람 아냐.</div></div>
       <button class="toggle" id="tgCues"></button>
     </div>
+    <div class="row">
+      <div><div class="label">탭 소리</div><div class="desc">유리 진주처럼 맑고 작은 소리. 알람 아냐 — 누를 때만 살짝.</div></div>
+      <button class="toggle" id="tgSfx"></button>
+    </div>
     <div class="hint" id="nudgeHint"></div>
   </div>
 </div>
+
+<div class="ribbon" id="mileRibbon"></div>
 
 <script>
 "use strict";
@@ -597,12 +628,12 @@ body{
    60초 리셋 — Liquid Pearl Aura edition
    실패 불가능 / 죄책감 0 / 한 번에 하나 / 열 때마다 새 출발
    ============================================================ */
-const K = { settings:"reset60:settings", log:"reset60:log", lastOpen:"reset60:lastOpen" };
+const K = { settings:"reset60:settings", log:"reset60:log", lastOpen:"reset60:lastOpen", pearlSeen:"reset60:pearlSeen", mileSeen:"reset60:mileSeen" };
 const load = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } };
 const save = (k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 
-const DEFAULT_SETTINGS = { nudgeEnabled:false, nudgeCount:2, nudgeTime:"10:00", cuesEnabled:false };
+const DEFAULT_SETTINGS = { nudgeEnabled:false, nudgeCount:2, nudgeTime:"10:00", cuesEnabled:false, sfxEnabled:true };
 let settings = Object.assign({}, DEFAULT_SETTINGS, load(K.settings, {}));
 
 /* ---------- 눈 감고 쓰는 모드: 부드러운 진동 + 싱잉볼 한 음 (기본 OFF) ---------- */
@@ -627,6 +658,37 @@ function cue(opts){
   opts=opts||{};
   if(navigator.vibrate){ try{ navigator.vibrate(opts.long?[30,55,30]:40); }catch(_){} }
   chime(opts.freq);
+}
+/* ---------- 버튼 사운드 이펙트 (펄/유리 톤, 기본 ON, audioCtx 재사용) ---------- */
+function tone(ctx,t,o){
+  const osc=ctx.createOscillator(), g=ctx.createGain();
+  osc.type=o.type||"sine"; osc.frequency.value=o.freq; if(o.det) osc.detune.value=o.det;
+  const att=o.att||0.006, dec=o.dec||0.12, gain=o.gain||0.05, s=t+(o.delay||0);
+  g.gain.setValueAtTime(0.0001,s);
+  g.gain.exponentialRampToValueAtTime(gain,s+att);
+  g.gain.exponentialRampToValueAtTime(0.0001,s+att+dec);
+  osc.connect(g).connect(ctx.destination); osc.start(s); osc.stop(s+att+dec+0.05);
+}
+const SFX={
+  word:[{freq:523.25,att:.008,dec:.26,gain:.06,det:2},{freq:784,att:.008,dec:.26,gain:.024}],
+  prayer:[{freq:587.33,att:.008,dec:.27,gain:.06,det:2},{freq:880,att:.008,dec:.27,gain:.021}],
+  cpick:[{freq:659.25,att:.009,dec:.30,gain:.06,det:3},{freq:987.77,att:.009,dec:.30,gain:.021}],
+  breath:[{freq:783.99,att:.010,dec:.32,gain:.06},{freq:1174.66,att:.010,dec:.32,gain:.018}],
+  tap:[{freq:1046.5,type:"triangle",att:.003,dec:.07,gain:.045}],
+  chip:[{freq:880,att:.004,dec:.12,gain:.05},{freq:1318.51,att:.004,dec:.12,gain:.015}],
+  enough:[{freq:659.25,att:.014,dec:.9,gain:.035},{freq:987.77,att:.014,dec:.9,gain:.025},{freq:1318.51,att:.016,dec:.9,gain:.018}],
+  shuffle:[{freq:880,att:.003,dec:.11,gain:.045},{freq:1108.73,att:.003,dec:.11,gain:.04,delay:.035}],
+  on:[{freq:783.99,type:"triangle",att:.003,dec:.09,gain:.04}],
+  off:[{freq:739.99,type:"triangle",att:.003,dec:.09,gain:.04}],
+};
+SFX.mile=SFX.enough;
+function sfx(name){
+  if(!settings.sfxEnabled) return;
+  const spec=SFX[name]; if(!spec) return;
+  try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    if(!audioCtx) audioCtx=new AC(); if(audioCtx.state==="suspended") audioCtx.resume();
+    const t=audioCtx.currentTime; spec.forEach(v=>tone(audioCtx,t,v));
+  }catch(_){}
 }
 /* ---------- 셔플/구절 교체 부드러운 페이드 ---------- */
 function fadeSwap(el, fn){ if(!el){ fn(); return; } el.style.transition="opacity .26s var(--ease)"; el.style.opacity="0"; setTimeout(()=>{ fn(); el.style.opacity="1"; },200); }
@@ -794,6 +856,7 @@ function show(name){
   if(name==="timer") startTimer();
   if(name==="log") renderLog();
   if(["breath","timer","center","prayer"].includes(name)) startField(name); else stopField();
+  if(name!=="log") stopPearlSky();
   if(name==="enough"){ enoughTimer=setTimeout(()=>{ enoughTimer=null; show(lolFlag ? "lol" : "one"); }, 1600); }
   if(name==="home") refreshGreeting();
   // 처음으로 단축키: 홈 화면엔 숨기고 나머지 화면에서만 노출
@@ -809,8 +872,12 @@ function ripple(e){
   s.style.top=((e.touches?e.touches[0].clientY:e.clientY)-r.top)+"px";
   b.appendChild(s); setTimeout(()=>s.remove(),750);
   if(navigator.vibrate) try{navigator.vibrate(8);}catch(_){}
+  const go=b.dataset.go;
+  sfx( (go && SFX[go]) ? go : (b.dataset.enough || b.id==="timerStop") ? "enough" : b.classList.contains("chip") ? "chip" : "tap" );
 }
 document.querySelectorAll(".btn,.chip").forEach(b=>b.addEventListener("pointerdown",ripple));
+document.querySelectorAll(".icon-btn").forEach(b=>b.addEventListener("pointerdown",()=>sfx("tap")));
+document.querySelectorAll(".softlink").forEach(b=>b.addEventListener("pointerdown",()=>sfx(/Reshuffle$|verseAnother/.test(b.id)?"shuffle":"tap")));
 
 /* ============================================================ 호흡 */
 let breathTimer=null;
@@ -927,7 +994,7 @@ function startTimer(){
 function finishTimer(complete){
   clearInterval(timerId);
   const d=document.getElementById("doneText"), s=document.getElementById("doneSub");
-  if(complete){ d.innerHTML="<span class='em'>해냈다. 진짜로.</span>"; s.textContent="닫아도 성공이야."; }
+  if(complete){ d.innerHTML="<span class='em'>해냈다. 진짜로.</span>"; s.textContent="닫아도 성공이야."; sfx("enough"); }
   else { d.innerHTML="<span class='em'>이거면 충분해.</span>"; s.textContent="시작한 것만으로 충분해."; }
   document.getElementById("doneMore").classList.remove("collapsed");
   show("done");
@@ -937,15 +1004,90 @@ document.getElementById("timerStop").addEventListener("click",()=>{
 });
 
 /* ============================================================ 로그 */
-function logAdd(type,thing){ const log=load(K.log,[]); log.push({ts:new Date().toISOString(),type,thing:thing||undefined}); save(K.log,log); }
 const LOG_ICON={breath:"i-wind",word:"i-book",prayer:"i-candle",center:"i-lotus",fivemin:"i-clock"};
 const LOG_LABEL={breath:"호흡",word:"말씀",prayer:"기도",center:"고요",fivemin:"3분"};
+const PEARL_COL={breath:"171,159,228",word:"255,247,230",prayer:"240,210,150",center:"190,224,242",fivemin:"255,255,255"};
+function logAdd(type,thing){ const log=load(K.log,[]); log.push({ts:new Date().toISOString(),type,thing:thing||undefined}); save(K.log,log); checkMilestone(log.length); }
+
+/* 마일스톤 — 도달 순간에만 조용한 격려(누적 기준, streak/카운트다운 없음) */
+const MILE=[10,30,50,100,200,365];
+const MILE_MSG={10:"진주 열 개. 시작도 못 했다고 느꼈을 때, 이미 열 번 왔었어.",30:"서른 번의 멈춤이 하늘에 떠 있어. 천천히, 그런데 분명히.",50:"쉰 개의 빛. 도망 대신 여기를 고른 쉰 번이야.",100:"진주 백 개. 백 번 너는 너에게 돌아왔어. 그거면 충분해.",200:"이백 개. 하늘이 제법 환해졌네 — 다 네가 켠 거야.",365:"삼백예순다섯 개의 멈춤. 숫자는 트로피가 아니라, 잘 왔다는 표시일 뿐이야."};
+function checkMilestone(total){
+  const seen=load(K.mileSeen,0);
+  const reached=MILE.filter(m=>total>=m); const top=reached[reached.length-1]||0;
+  if(top>seen){ save(K.mileSeen,top); showRibbon(MILE_MSG[top]); sfx("mile"); }
+}
+let ribbonTimer=null;
+function showRibbon(msg){
+  const r=document.getElementById("mileRibbon"); if(!r) return;
+  r.textContent=msg; r.classList.add("show");
+  if(ribbonTimer) clearTimeout(ribbonTimer);
+  ribbonTimer=setTimeout(()=>r.classList.remove("show"), 4200);
+}
+
+/* 진주 하늘 — 누적 성좌(절대 안 줄어듦). 황금각 결정론 배치 = 같은 진주 같은 자리 */
+let pearlRaf=0;
+function stopPearlSky(){ if(pearlRaf){ cancelAnimationFrame(pearlRaf); pearlRaf=0; } }
+function drawPearlSky(log, prevSeen){
+  stopPearlSky();
+  const cv=document.getElementById("pearlSky"); if(!cv) return;
+  const rect=cv.getBoundingClientRect(); if(!rect.width) return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=Math.round(rect.width*dpr); cv.height=Math.round(rect.height*dpr);
+  const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=rect.width,H=rect.height,cx=W/2,cy=H/2;
+  const cap=160, n=Math.min(log.length,cap), GA=2.399963229;
+  const k=(Math.min(W,H)/2-8)/Math.sqrt(cap);
+  function frame(now){
+    const time=(now||0)*0.001;
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<n;i++){
+      const ang=i*GA, rad=Math.sqrt(i)*k;
+      const x=cx+Math.cos(ang)*rad, y=cy+Math.sin(ang)*rad;
+      const type=(log[i]&&log[i].type)||"fivemin";
+      const col=PEARL_COL[type]||"255,255,255";
+      const fresh=i>=prevSeen;
+      const br=reduce?1:(0.94+0.06*Math.sin(time*0.6+i*0.7));
+      let al=(0.45+0.4*(i/Math.max(n,1)))*br;
+      let rr=1.5+1.1*(i/Math.max(n,1));
+      if(fresh){ al=Math.min(1,al+0.35); rr+=0.9; }
+      const grad=ctx.createRadialGradient(x,y,0,x,y,rr*3.2);
+      grad.addColorStop(0,"rgba(255,255,255,"+al.toFixed(3)+")");
+      grad.addColorStop(.45,"rgba("+col+","+(al*0.55).toFixed(3)+")");
+      grad.addColorStop(1,"rgba("+col+",0)");
+      ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(x,y,rr*3.2,0,6.283); ctx.fill();
+    }
+    if(!reduce) pearlRaf=requestAnimationFrame(frame);
+  }
+  if(reduce) frame(0); else pearlRaf=requestAnimationFrame(frame);
+}
+/* 멈춤의 결 — 모드별 누적(우열·퍼센트·막대 없음, 0=초대 여백) */
+function renderWeave(log){
+  const box=document.getElementById("pearlWeave"); if(!box) return;
+  const order=["breath","word","prayer","center","fivemin"];
+  const cnt={}; order.forEach(t=>cnt[t]=0);
+  log.forEach(e=>{ if(cnt[e.type]!=null) cnt[e.type]++; });
+  const total=log.length;
+  const NOTE={breath:"요즘 너는 호흡으로 자주 멈췄구나.",word:"말씀 곁에 자주 머물렀네.",prayer:"기도 진주가 살며시 늘고 있어.",center:"고요 안에 자주 들렀구나.",fivemin:"작은 한 걸음을 여러 번 떼었네."};
+  const top=order.slice().sort((a,b)=>cnt[b]-cnt[a])[0];
+  let html = total ? "<div class='weave-note'>"+(NOTE[top]||"")+" 어느 게 많고 적고는 중요하지 않아. 다 너야.</div>" : "";
+  order.forEach(t=>{
+    const c=cnt[t], col=PEARL_COL[t]; let dots="";
+    if(c===0){ dots="<span class='dot e'></span><span class='dot e'></span><span class='dot e'></span><span class='emptynote'>아직 비어 있는 하늘 — 언제든 천천히</span>"; }
+    else { const sh=Math.min(c,24); for(let i=0;i<sh;i++) dots+="<span class='dot' style='background:rgba("+col+",.9)'></span>"; if(c>24) dots+="<span class='more'>+"+(c-24)+"</span>"; }
+    html+="<div class='weave-row"+(c===0?" empty":"")+"'><span class='wl'>"+LOG_LABEL[t]+"</span><span class='dots'>"+dots+"</span></div>";
+  });
+  box.innerHTML=html;
+}
 function renderLog(){
   const log=load(K.log,[]);
-  const now=new Date(), day=(now.getDay()+6)%7;
-  const weekStart=new Date(now); weekStart.setHours(0,0,0,0); weekStart.setDate(now.getDate()-day);
-  const week=log.filter(e=>new Date(e.ts)>=weekStart && ["breath","word","prayer","center"].includes(e.type)).length;
-  document.getElementById("weekCount").textContent=week;
+  const total=log.length;
+  document.getElementById("totalCount").textContent=total.toLocaleString("ko-KR");
+  document.getElementById("totalSub").textContent = total>0 ? "하나도 사라지지 않았어" : "첫 진주를 기다리는 하늘이야 — 천천히 와.";
+  const prevSeen=Math.max(0, load(K.pearlSeen, total));
+  drawPearlSky(log, prevSeen);
+  save(K.pearlSeen, total);
+  renderWeave(log);
   const today=new Date(); today.setHours(0,0,0,0);
   const items=log.filter(e=>new Date(e.ts)>=today).slice().reverse();
   const list=document.getElementById("logList"); list.innerHTML="";
@@ -1011,6 +1153,7 @@ const tgNudge=document.getElementById("tgNudge"), freqSeg=document.getElementByI
 function syncSettingsUI(){
   tgNudge.classList.toggle("on",!!settings.nudgeEnabled);
   document.getElementById("tgCues").classList.toggle("on",!!settings.cuesEnabled);
+  document.getElementById("tgSfx").classList.toggle("on",!!settings.sfxEnabled);
   [...freqSeg.children].forEach(b=>b.classList.toggle("sel",+b.dataset.n===settings.nudgeCount));
   nudgeTime.value=settings.nudgeTime||"10:00";
   document.getElementById("nudgeFreqRow").style.opacity=settings.nudgeEnabled?1:.45;
@@ -1028,7 +1171,12 @@ freqSeg.addEventListener("click",e=>{ if(e.target.dataset.n){ settings.nudgeCoun
 nudgeTime.addEventListener("change",()=>{ settings.nudgeTime=nudgeTime.value; save(K.settings,settings); scheduleNudges(); });
 document.getElementById("tgCues").addEventListener("click",()=>{
   settings.cuesEnabled=!settings.cuesEnabled; save(K.settings,settings); syncSettingsUI();
+  sfx(settings.cuesEnabled?"on":"off");
   if(settings.cuesEnabled) cue();
+});
+document.getElementById("tgSfx").addEventListener("click",()=>{
+  settings.sfxEnabled=!settings.sfxEnabled; save(K.settings,settings); syncSettingsUI();
+  sfx(settings.sfxEnabled?"on":"off");
 });
 
 let nudgeTimers=[];
