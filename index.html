@@ -461,6 +461,8 @@ body{
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 2"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.8 10.6 12 4l8.2 6.6"/><path d="M5.6 9.4V19a.8.8 0 0 0 .8.8h11.2a.8.8 0 0 0 .8-.8V9.4"/><path d="M9.8 19.8v-5.2h4.4v5.2"/></symbol>
   <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.4 4.8 13.2a4.3 4.3 0 0 1 6.1-6.1l1.1 1.1 1.1-1.1a4.3 4.3 0 0 1 6.1 6.1Z"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M5 9.3h3.2L12.5 6v12L8.2 14.7H5z"/><path d="M15.6 9.2a4 4 0 0 1 0 5.6"/><path d="M18 7a7 7 0 0 1 0 10"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M5 9.3h3.2L12.5 6v12L8.2 14.7H5z"/><path d="M16 9.5l4.5 5M20.5 9.5l-4.5 5"/></symbol>
 </svg>
 
 <div class="bg-img"></div>
@@ -546,7 +548,9 @@ body{
       </div>
       <div class="fade-line" id="prayerHint">눈 감고 외워도, 천천히 읽어도 좋아.</div>
       <button class="btn btn-soft" data-enough="prayer"><svg class="ic"><use href="#i-check"/></svg>이거면 충분해</button>
+      <button class="softlink" id="prayerMute"><svg class="ic"><use href="#i-sound"/></svg>소리 끄기</button>
     </div>
+    <audio id="prayerAudio" preload="auto"><source src="assets/prayer.mp3" type="audio/mpeg"></audio>
   </section>
 
   <!-- CENTER pick -->
@@ -691,7 +695,7 @@ const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent||"") || (navigator.platform==="MacIntel" && (navigator.maxTouchPoints||0)>1);
 if(isIOS && document.documentElement) document.documentElement.classList.add("flat-text");
 
-const DEFAULT_SETTINGS = { cuesEnabled:true, sfxEnabled:true, dflt2:true };
+const DEFAULT_SETTINGS = { cuesEnabled:true, sfxEnabled:true, prayerMuted:false, dflt2:true };
 let settings = Object.assign({}, DEFAULT_SETTINGS, load(K.settings, {}));
 /* 신호·탭소리를 기본 ON으로 — 이전에 설정이 저장된 사용자도 한 번만 적용(이후 직접 끄면 그 선택 유지) */
 if(!settings.dflt2){ settings.cuesEnabled=true; settings.sfxEnabled=true; settings.dflt2=true; save(K.settings,settings); }
@@ -989,35 +993,63 @@ document.getElementById("gratDone").addEventListener("click",()=>{
 });
 
 /* ============================================================ 기도 */
-const PRAYER_LINES = [
-  {ko:"하늘에 계신 우리 아버지여", en:"Our Father which art in heaven,"},
-  {ko:"이름이 거룩히 여김을 받으시오며", en:"Hallowed be thy name."},
-  {ko:"나라가 임하시오며", en:"Thy kingdom come."},
-  {ko:"뜻이 하늘에서 이루어진 것 같이", en:"Thy will be done,"},
-  {ko:"땅에서도 이루어지이다", en:"on earth as it is in heaven."},
-  {ko:"오늘날 우리에게\n일용할 양식을 주시옵고", en:"Give us this day\nour daily bread."},
-  {ko:"우리가 우리에게 죄 지은 자를\n사하여 준 것 같이", en:"as we forgive those\nwho sin against us,"},
-  {ko:"우리 죄를 사하여 주시옵고", en:"and forgive us our sins;"},
-  {ko:"우리를 시험에 들게 하지 마시옵고", en:"And lead us not into temptation,"},
-  {ko:"다만 악에서 구하시옵소서", en:"but deliver us from evil."},
-  {ko:"나라와 권세와 영광이\n아버지께 영원히 있사옵나이다", en:"For thine is the kingdom,\nthe power, and the glory, for ever."},
-  {ko:"아멘.", en:"Amen."},
+/* SRT 타임스탬프(초)에 맞춰 음성(assets/prayer.mp3)과 텍스트 싱크 */
+const PRAYER_CUES = [
+  {t:0.0,   ko:"하늘에 계신 우리 아버지여", en:"Our Father which art in heaven,"},
+  {t:2.752, ko:"이름이 거룩히 여김을 받으시오며", en:"Hallowed be thy name."},
+  {t:5.845, ko:"나라가 임하시오며", en:"Thy kingdom come."},
+  {t:8.149, ko:"뜻이 하늘에서 이루어진 것 같이", en:"Thy will be done,"},
+  {t:11.138,ko:"땅에서도 이루어지이다", en:"on earth as it is in heaven."},
+  {t:13.918,ko:"오늘날 우리에게\n일용할 양식을 주시옵고", en:"Give us this day\nour daily bread."},
+  {t:17.909,ko:"우리가 우리에게 죄 지은 자를\n사하여 준 것 같이", en:"as we forgive those\nwho sin against us,"},
+  {t:21.628,ko:"우리 죄를 사하여 주시옵고", en:"and forgive us our sins;"},
+  {t:24.846,ko:"우리를 시험에 들게 하지 마시옵고", en:"And lead us not into temptation,"},
+  {t:27.772,ko:"다만 악에서 구하시옵소서", en:"but deliver us from evil."},
+  {t:30.911,ko:"나라와 권세와 영광이", en:"For thine is the kingdom,"},
+  {t:33.362,ko:"아버지께 영원히 있사옵나이다", en:"the power, and the glory, for ever."},
+  {t:36.532,ko:"아멘.", en:"Amen."},
 ];
-let prayerTimer=null;
+let prayerAudio=null, prayerFallback=[], prayerCur=-1;
+function renderPrayerCue(idx){
+  const el=document.getElementById("prayerLine"); if(!el || idx===prayerCur) return;
+  prayerCur=idx; const L=PRAYER_CUES[idx];
+  if(settings.cuesEnabled && navigator.vibrate){ try{ navigator.vibrate(idx===PRAYER_CUES.length-1?[20,40]:14); }catch(_){} }
+  el.style.opacity=0;
+  setTimeout(()=>{ el.innerHTML="<span class='pk'>"+L.ko.replace(/\n/g,"<br>")+"</span><span class='pe'>"+L.en.replace(/\n/g,"<br>")+"</span>"; el.style.opacity=1; },360);
+}
+function cueIndexAt(t){ let idx=0; for(let i=0;i<PRAYER_CUES.length;i++){ if(t>=PRAYER_CUES[i].t-0.05) idx=i; else break; } return idx; }
+function updatePrayerMute(){
+  const b=document.getElementById("prayerMute"); if(!b) return;
+  b.innerHTML="<svg class='ic'><use href='#"+(settings.prayerMuted?"i-mute":"i-sound")+"'/></svg>"+(settings.prayerMuted?"소리 켜기":"소리 끄기");
+}
+function startPrayerFallback(hint){
+  prayerFallback.forEach(clearTimeout); prayerFallback=[];
+  PRAYER_CUES.forEach((c,i)=>{ if(i===0) return; prayerFallback.push(setTimeout(()=>renderPrayerCue(i), Math.round(c.t*1000))); });
+  prayerFallback.push(setTimeout(()=>{ if(hint) hint.textContent="이거면 충분해 — 천천히."; }, Math.round((PRAYER_CUES[PRAYER_CUES.length-1].t+3)*1000)));
+}
 function startPrayer(){
   stopPrayer();
   const el=document.getElementById("prayerLine"), hint=document.getElementById("prayerHint");
-  hint.textContent="눈 감고 외워도, 천천히 읽어도 좋아."; let i=0;
-  const render=()=>{ el.style.opacity=0; cue(); setTimeout(()=>{ const L=PRAYER_LINES[i];
-    el.innerHTML="<span class='pk'>"+L.ko.replace(/\n/g,"<br>")+"</span><span class='pe'>"+L.en.replace(/\n/g,"<br>")+"</span>";
-    el.style.opacity=1; },450); };
-  render();
-  prayerTimer=setInterval(()=>{ i++;
-    if(i>=PRAYER_LINES.length){ clearInterval(prayerTimer); prayerTimer=null; hint.textContent="이거면 충분해 — 천천히."; cue({long:true}); return; }
-    render();
-  },4000);
+  hint.textContent="눈 감고 외워도, 천천히 읽어도 좋아.";
+  prayerCur=-1; renderPrayerCue(0); updatePrayerMute();
+  prayerAudio=document.getElementById("prayerAudio");
+  if(prayerAudio){
+    prayerAudio.muted=!!settings.prayerMuted;
+    try{ prayerAudio.currentTime=0; }catch(_){}
+    prayerAudio.ontimeupdate=()=>renderPrayerCue(cueIndexAt(prayerAudio.currentTime));
+    prayerAudio.onended=()=>{ hint.textContent="이거면 충분해 — 천천히."; };
+    const p=prayerAudio.play(); if(p&&p.catch) p.catch(()=>startPrayerFallback(hint));
+  } else { startPrayerFallback(hint); }
 }
-function stopPrayer(){ if(prayerTimer){clearInterval(prayerTimer);prayerTimer=null;} }
+function stopPrayer(){
+  prayerFallback.forEach(clearTimeout); prayerFallback=[];
+  if(prayerAudio){ try{ prayerAudio.pause(); prayerAudio.ontimeupdate=null; prayerAudio.onended=null; prayerAudio.currentTime=0; }catch(_){} }
+}
+document.getElementById("prayerMute").addEventListener("click",()=>{
+  settings.prayerMuted=!settings.prayerMuted; save(K.settings,settings);
+  if(prayerAudio) prayerAudio.muted=settings.prayerMuted;
+  updatePrayerMute();
+});
 
 /* ============================================================ 고요 */
 const CENTER_WORDS = [
