@@ -1,6 +1,6 @@
 /* 60초 리셋 — service worker (오프라인 캐시)
    bump CACHE 버전을 올리면 새 버전이 배포됨 */
-const CACHE = "reset60-v32";
+const CACHE = "reset60-v33";
 const CORE = [
   "./",
   "./index.html",

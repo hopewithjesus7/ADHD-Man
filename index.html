@@ -813,7 +813,7 @@ function sfx(name){
 /* ---------- 셔플/구절 교체 부드러운 페이드 ---------- */
 function fadeSwap(el, fn){ if(!el){ fn(); return; } el.style.transition="opacity .26s var(--ease)"; el.style.opacity="0"; setTimeout(()=>{ fn(); el.style.opacity="1"; },200); }
 /* ---------- 배경 음악(잔잔한 음악): 두 베드(v1↔v2)를 크로스페이드로 끝없이 이어 재생 + 기도 오버레이 + 완료/웰컴 원샷 ---------- */
-const BED_VOL=0.5, PRAYER_VOL=0.32, BED_XF=6, BED_DUCK=0.18; let bedStarted=false, bedIdx=0, bedHanding=false, bedHandTO=null, bedGen=0, bedTargetVol=BED_VOL;
+const BED_VOL=0.5, PRAYER_VOL=0.32, BED_XF=6, BED_DUCK=0.18; let bedStarted=false, bedIdx=0, bedHanding=false, bedHandTO=null, bedGen=0, bedTargetVol=BED_VOL, bedSuspended=false;
 function bedEls(){ return [document.getElementById("bgmBed1"), document.getElementById("bgmBed2")]; }
 function fadeAudio(el, to, ms){
   if(!el) return; if(el._fade) clearInterval(el._fade);
@@ -827,7 +827,7 @@ function clearHandTO(){ if(bedHandTO){ clearTimeout(bedHandTO); bedHandTO=null; 
    세대(bedGen) 토큰으로 늦게 도착한 play() 콜백을 무효화 → OFF/재진입 레이스로 두 곡이 겹치거나 무음 정지하는 것 방지.
    다음 곡 재생이 '확정된 뒤에만' 현재 곡을 줄여 무음 위험 제거(실패 시 현재 곡 유지) */
 function bedTick(){
-  if(!bedStarted || bedHanding) return;
+  if(!bedStarted || bedHanding || bedSuspended) return;
   const els=bedEls(), cur=els[bedIdx]; if(!cur) return;
   const D=cur.duration; if(!isFinite(D)||D<1) return;
   if(cur.currentTime < D-BED_XF) return;
@@ -843,7 +843,7 @@ function bedTick(){
   }).catch(()=>{ if(g===bedGen) bedHanding=false; });  // 다음 곡 재생 실패 → 현재 곡 그대로 유지
 }
 function ensureBed(){
-  if(!settings.musicEnabled || bedStarted) return; bedStarted=true;
+  if(!settings.musicEnabled || bedStarted) return; bedStarted=true; bedSuspended=false;
   clearHandTO(); bedGen++; const g=bedGen;
   const els=bedEls(); bedIdx=0; bedHanding=false;
   els.forEach(el=>{ if(!el) return;
@@ -853,15 +853,17 @@ function ensureBed(){
       el.addEventListener("timeupdate",bedTick);
       el.addEventListener("ended",()=>{ if(bedStarted && !bedHanding) bedTick(); }); } });
   const bed=els[0]; if(!bed){ bedStarted=false; return; }
-  bed.play().then(()=>{ if(bedStarted && g===bedGen) fadeAudio(bed,bedTargetVol,1400); }).catch(()=>{ bedStarted=false; });
+  bed.play().then(()=>{ if(bedStarted && g===bedGen && !bedSuspended) fadeAudio(bed,bedTargetVol,1400); else if(bedSuspended){ try{ bed.pause(); }catch(_){} } }).catch(()=>{ bedStarted=false; });
   /* iOS 자동재생 잠금 해제: 두 번째 베드를 사용자 제스처 안에서 무음 prime(나중 핸드오프 거부 방지) */
   const b2=els[1]; if(b2){ try{ const pp=b2.play(); if(pp&&pp.then) pp.then(()=>{ try{ b2.pause(); b2.currentTime=0; b2.volume=0; }catch(_){} }).catch(()=>{}); }catch(_){} }
 }
-function stopBed(){ bedStarted=false; bedHanding=false; clearHandTO(); bedGen++; bedEls().forEach(el=>fadeAudio(el,0,800)); fadeAudio(document.getElementById("bgmPrayer"),0,500); }
+function stopBed(){ bedStarted=false; bedHanding=false; bedSuspended=false; clearHandTO(); bedGen++; bedEls().forEach(el=>fadeAudio(el,0,800)); fadeAudio(document.getElementById("bgmPrayer"),0,500); }
 /* 호흡 중엔 베드를 낮춰(덕킹) 들이쉬고·내쉬고 소리가 묻히지 않게 */
 function duckBed(on){ bedTargetVol = on ? BED_DUCK : BED_VOL; if(bedStarted){ const a=bedEls()[bedIdx]; if(a && !a.paused) fadeAudio(a, bedTargetVol, 500); } }
-/* 기도 중엔 일반 베드를 잠시 멈춤 — 주기도문 underscore(bgmPrayer)와 두 곡이 겹쳐 웅웅거리지 않게. 기도를 떠나면 베드 복귀 */
+/* 기도 중엔 일반 베드를 잠시 멈춤 — 주기도문 underscore(bgmPrayer)와 두 곡이 겹쳐 웅웅거리지 않게. 기도를 떠나면 베드 복귀.
+   bedSuspended 플래그로 ensureBed의 '뒤늦게 resolve되는 fade-in 콜백'이 베드를 되살리지 못하게 막는다(레이스 차단) */
 function bedSuspend(on){
+  bedSuspended=on;
   if(!bedStarted) return;
   if(on){ bedEls().forEach(el=>{ if(el && !el.paused) fadeAudio(el,0,600); }); }
   else if(settings.musicEnabled){ const a=bedEls()[bedIdx]; if(a) fadeAudio(a, bedTargetVol, 900); }
