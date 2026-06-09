@@ -860,6 +860,12 @@ function ensureBed(){
 function stopBed(){ bedStarted=false; bedHanding=false; clearHandTO(); bedGen++; bedEls().forEach(el=>fadeAudio(el,0,800)); fadeAudio(document.getElementById("bgmPrayer"),0,500); }
 /* 호흡 중엔 베드를 낮춰(덕킹) 들이쉬고·내쉬고 소리가 묻히지 않게 */
 function duckBed(on){ bedTargetVol = on ? BED_DUCK : BED_VOL; if(bedStarted){ const a=bedEls()[bedIdx]; if(a && !a.paused) fadeAudio(a, bedTargetVol, 500); } }
+/* 기도 중엔 일반 베드를 잠시 멈춤 — 주기도문 underscore(bgmPrayer)와 두 곡이 겹쳐 웅웅거리지 않게. 기도를 떠나면 베드 복귀 */
+function bedSuspend(on){
+  if(!bedStarted) return;
+  if(on){ bedEls().forEach(el=>{ if(el && !el.paused) fadeAudio(el,0,600); }); }
+  else if(settings.musicEnabled){ const a=bedEls()[bedIdx]; if(a) fadeAudio(a, bedTargetVol, 900); }
+}
 /* 녹음된 원샷(완료·마무리·쉼·축하) — '잔잔한 음악'이 켜져 있을 때만. 실패하면 호출부가 합성음으로 폴백 */
 function playSnd(id, vol){
   if(!settings.musicEnabled) return false;
@@ -1027,6 +1033,7 @@ function show(name){
   if(name==="breath") startBreath(); else stopBreath();
   duckBed(name==="breath");
   if(name==="prayer") startPrayer(); else stopPrayer();
+  bedSuspend(name==="prayer");
   if(name==="cpick") renderCenterChips();
   if(name==="gratitude") startGratitude();
   if(name==="center") startCenter();
